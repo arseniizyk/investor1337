@@ -42,7 +42,7 @@ type Response struct {
 			Discount            float64 `json:"discount"`
 			Computed            float64 `json:"computed"`
 			BasePrice           float64 `json:"basePrice"`
-			PriceCoefficient    int     `json:"priceCoefficient"`
+			PriceCoefficient    float64 `json:"priceCoefficient"`
 		} `json:"pricing"`
 		Links struct {
 			ThreeD      any    `json:"3d"`

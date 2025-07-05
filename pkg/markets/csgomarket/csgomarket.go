@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const commissionMultiplier = 1.038
+
 type csgoMarket struct {
 	token string
 	l     *zap.Logger
@@ -60,7 +62,7 @@ func (cm csgoMarket) FindByHashName(hashName string) (map[float64]int, error) {
 			break
 		}
 		p := float64(o.Price) / 1000
-		result[p] = o.Count
+		result[p*commissionMultiplier] = o.Count
 	}
 
 	return result, nil

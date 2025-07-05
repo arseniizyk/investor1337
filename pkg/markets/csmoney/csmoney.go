@@ -11,6 +11,9 @@ import (
 	"go.uber.org/zap"
 )
 
+const commissionCoeff = 1.042
+const epsilon = 0.0001
+
 type csmoney struct {
 	l *zap.Logger
 }
@@ -26,7 +29,8 @@ func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 	if err != nil {
-		csm.l.Warn("Cant make request for csmoney", zap.Error(err))
+		csm.l.Error("Cant make request for csmoney", zap.Error(err))
+		return nil, err
 	}
 
 	c := &http.Client{}
@@ -53,7 +57,7 @@ func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
 		csm.l.Debug("formatting cs.money response")
 		results := format(res)
 
-		csm.l.Info("csmoney FindByHashName success", zap.String("name", name))
+		csm.l.Debug("csmoney FindByHashName success", zap.String("name", name))
 		return results, nil
 
 	default:
@@ -73,7 +77,7 @@ func format(r Response) map[float64]int {
 			break
 		}
 		if item.Pricing.BasePrice != price {
-			results[price] = count
+			results[price*commissionCoeff] = count
 			count = 1
 			price = item.Pricing.BasePrice
 			continue

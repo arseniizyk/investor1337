@@ -12,11 +12,17 @@ type Tbot interface {
 type tbot struct {
 	token   string
 	l       *zap.Logger
-	cstm    markets.Market
-	csmoney markets.Market
-	steam   markets.Market
+	markets map[string]markets.Market
 }
 
 func New(token string, l *zap.Logger, cstm, csmoney, steam markets.Market) Tbot {
-	return tbot{token, l, cstm, csmoney, steam}
+	return tbot{
+		token: token,
+		l:     l,
+		markets: map[string]markets.Market{
+			"CS Market": cstm,
+			"CSmoney":   csmoney,
+			"Steam":     steam,
+		},
+	}
 }

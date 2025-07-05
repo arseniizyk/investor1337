@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -36,52 +37,67 @@ func (t tbot) Run() error {
 }
 
 func (t tbot) findByName(c tele.Context) error {
-	skin := c.Text()
-
 	var (
-		cmRes      map[float64]int
-		csmoneyRes map[float64]int
-		steamRes   map[float64]int
-		err        error
+		skin      = c.Text()
+		wg        = sync.WaitGroup{}
+		mu        = sync.Mutex{}
+		responses = make(map[string]map[float64]int, 0)
 	)
 
-	if cmRes, err = t.cstm.FindByHashName(skin); err != nil {
-		t.l.Warn("CS Market error", zap.Error(err))
-		cmRes = map[float64]int{}
+	start := time.Now()
+
+	for name, svc := range t.markets {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			res, err := svc.FindByHashName(skin) // TODO provide context
+			mu.Lock()
+			defer mu.Unlock()
+
+			if err != nil {
+				t.l.Warn("error in FindByHashName",
+					zap.String("market", name),
+					zap.String("hash_name", skin),
+					zap.Error(err),
+				)
+
+				responses[name] = make(map[float64]int, 0)
+			} else {
+				responses[name] = res
+			}
+		}()
 	}
 
-	if csmoneyRes, err = t.csmoney.FindByHashName(skin); err != nil {
-		t.l.Warn("CS Money error", zap.Error(err))
-		csmoneyRes = map[float64]int{}
-	}
+	wg.Wait()
 
-	if steamRes, err = t.steam.FindByHashName(strings.ToLower(skin)); err != nil {
-		t.l.Warn("Steam error", zap.Error(err))
-		steamRes = map[float64]int{}
-	}
+	msg := format(responses)
 
-	msg := format(cmRes, "CS Market") +
-		format(csmoneyRes, "CSmoney") +
-		format(steamRes, "Steam")
+	t.l.Debug("findByName time to answer", zap.Duration("duration", time.Since(start)))
 
 	return c.Send(msg)
 }
 
-func format(res map[float64]int, market string) string {
-	if len(res) == 0 {
-		return fmt.Sprintf("%s не найдено\n\n", market)
+func format(res map[string]map[float64]int) string {
+	var result strings.Builder
+
+	for market, offers := range res {
+		if len(offers) == 0 {
+			result.WriteString(fmt.Sprintf("%s не найдено предложений\n\n", market))
+			continue
+		}
+
+		keys := make([]float64, 0, len(offers))
+		for k := range offers {
+			keys = append(keys, k)
+		}
+		sort.Float64s(keys)
+
+		result.WriteString(fmt.Sprintf("%s\n", market))
+		for _, k := range keys {
+			result.WriteString(fmt.Sprintf("Price: $%.2f | %d\n", k, offers[k]))
+		}
+		result.WriteString("\n")
 	}
 
-	keys := make([]float64, 0, len(res))
-	for k := range res {
-		keys = append(keys, k)
-	}
-	sort.Float64s(keys)
-
-	result := fmt.Sprintf("%s\n", market)
-	for _, k := range keys {
-		result += fmt.Sprintf("Price: $%.2f | %d\n", k, res[k])
-	}
-	result += "\n"
-	return result
+	return result.String()
 }
