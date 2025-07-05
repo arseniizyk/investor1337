@@ -12,7 +12,6 @@ import (
 )
 
 const commissionCoeff = 1.042
-const epsilon = 0.0001
 
 type csmoney struct {
 	l *zap.Logger
