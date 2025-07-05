@@ -15,15 +15,10 @@ type tbot struct {
 	markets map[string]markets.Market
 }
 
-func New(token string, l *zap.Logger, cstm, csmoney, steam, ls markets.Market) Tbot {
+func New(token string, l *zap.Logger, services map[string]markets.Market) Tbot {
 	return tbot{
-		token: token,
-		l:     l,
-		markets: map[string]markets.Market{
-			"CS Market": cstm,
-			"CSmoney":   csmoney,
-			"Steam":     steam,
-			"Lis-skins": ls,
-		},
+		token:   token,
+		l:       l,
+		markets: services,
 	}
 }

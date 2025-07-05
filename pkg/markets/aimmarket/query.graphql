@@ -1,0 +1,15 @@
+query ApiBotsInventoryCountAndMinPrice(
+    $where: BotsInventoryWhereInput!
+    $currency: CurrencySymbolEnum
+) {
+    bots_inventory_count_and_min_price(where: $where, currency: $currency) {
+        marketHashName
+        count
+        price {
+            sellPrice
+            currency
+            __typename
+        }
+        __typename
+    }
+}

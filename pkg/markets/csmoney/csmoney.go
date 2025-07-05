@@ -23,7 +23,7 @@ func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
 
 	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
 	if err != nil {
