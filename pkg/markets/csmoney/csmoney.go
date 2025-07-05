@@ -7,11 +7,12 @@ import (
 	"net/url"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
+	"github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
 type csmoney struct {
-	logger *zap.Logger
+	l *zap.Logger
 }
 
 func New(l *zap.Logger) markets.Market {
@@ -24,36 +25,39 @@ func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
+	if err != nil {
+		csm.l.Warn("Cant make request for csmoney", zap.Error(err))
+	}
 
 	c := &http.Client{}
 	resp, err := c.Do(req)
 	if err != nil {
-		csm.logger.Error("Cant make request", zap.String("url", url), zap.Error(err))
+		csm.l.Error("Cant make request", zap.String("url", url), zap.Error(err))
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer utils.Dclose(resp.Body, csm.l)
 
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
-		csm.logger.Error("cs.money status code bad request:", zap.Int("status_code", resp.StatusCode), zap.String("name", name), zap.String("url", url))
+		csm.l.Error("cs.money status code bad request:", zap.Int("status_code", resp.StatusCode), zap.String("name", name), zap.String("url", url))
 		return nil, err
 
 	case http.StatusOK, http.StatusNotModified:
 		var res Response
 
 		if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-			csm.logger.Error("cant decode cs.money response", zap.Int("status_code", resp.StatusCode), zap.String("name", name))
+			csm.l.Error("cant decode cs.money response", zap.Int("status_code", resp.StatusCode), zap.String("name", name))
 			return nil, err
 		}
 
-		csm.logger.Debug("formatting cs.money response")
+		csm.l.Debug("formatting cs.money response")
 		results := format(res)
 
-		csm.logger.Info("csmoney FindByHashName success", zap.String("name", name))
+		csm.l.Info("csmoney FindByHashName success", zap.String("name", name))
 		return results, nil
 
 	default:
-		csm.logger.Error("invalid status code", zap.Int("status_code", resp.StatusCode))
+		csm.l.Error("invalid status code", zap.Int("status_code", resp.StatusCode))
 		return nil, nil
 	}
 }

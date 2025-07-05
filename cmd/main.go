@@ -10,7 +10,11 @@ import (
 
 func main() {
 	l, _ := zap.NewDevelopment()
-	defer l.Sync()
+	defer func() {
+		if err := l.Sync(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	l.Info("Initializing config")
 	cfg, err := config.New()

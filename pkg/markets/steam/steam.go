@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
@@ -20,7 +21,7 @@ func (s steam) FindByHashName(name string) (map[float64]int, error) {
 		s.l.Error("cant request steam", zap.String("name", name), zap.Error(err))
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer utils.Dclose(resp.Body, s.l)
 
 	switch resp.StatusCode {
 	case http.StatusOK:

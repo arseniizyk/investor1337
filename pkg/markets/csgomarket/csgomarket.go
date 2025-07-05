@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
+	"github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
@@ -38,7 +39,7 @@ func (cm csgoMarket) FindByHashName(hashName string) (map[float64]int, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cant get item by hashName: %w", err)
 	}
-	defer resp.Body.Close()
+	defer utils.Dclose(resp.Body, cm.l)
 
 	var r Response
 
