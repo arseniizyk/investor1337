@@ -64,10 +64,11 @@ func format(r *Response) (map[float64]int, error) {
 			break
 		}
 
-		re := regexp.MustCompile(`\d+\.?\d*`)
+		re := regexp.MustCompile(`\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+|\d+`)
 		comp := re.FindString(orders.Price)
+		clean := strings.ReplaceAll(comp, ",", "")
 
-		price, err := strconv.ParseFloat(comp, 64)
+		price, err := strconv.ParseFloat(clean, 64)
 		if err != nil {
 			return nil, err
 		}
