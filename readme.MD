@@ -12,6 +12,7 @@ Originally built for cases.
     -   [CSGO Market](https://market.csgo.com/en/)
     -   [Lis-Skins](https://lis-skins.com/)
     -   [CS.Money](https://cs.money/)
+    -   [Aim.Market(https://aim.market/)
 
 ---
 
