@@ -1,5 +1,16 @@
 package csmoney
 
+import (
+	"github.com/arseniizyk/investor1337/pkg/markets"
+	"go.uber.org/zap"
+)
+
+const commissionMult = 1.042
+
+type csmoney struct {
+	l *zap.Logger
+}
+
 type Response struct {
 	Items []struct {
 		ID     int `json:"id"`
@@ -51,4 +62,8 @@ type Response struct {
 		IsPartial     bool `json:"isPartial"`
 		IsMySellOrder bool `json:"isMySellOrder"`
 	} `json:"items"`
+}
+
+func New(l *zap.Logger) markets.Market {
+	return csmoney{l}
 }

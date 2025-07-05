@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/arseniizyk/investor1337/pkg/markets"
+	"github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
 )
@@ -38,41 +40,38 @@ func (t tbot) Run() error {
 
 func (t tbot) findByName(c tele.Context) error {
 	var (
-		skin      = c.Text()
-		wg        = sync.WaitGroup{}
-		mu        = sync.Mutex{}
-		responses = make(map[string]map[float64]int, 0)
+		wg = sync.WaitGroup{}
+		mu = sync.Mutex{}
 	)
 
+	skin := c.Text()
+	responses := make(map[string]map[float64]int, 0)
+
 	start := time.Now()
+	defer utils.RecordLatency(t.l, "findByName time to answer", start)
 
 	for name, svc := range t.markets {
 		wg.Add(1)
-		go func() {
+		go func(name string, svc markets.Market) {
+			start := time.Now()
+			defer utils.RecordLatency(t.l, fmt.Sprintf("%s time to answer", name), start)
+
 			defer wg.Done()
 			res, err := svc.FindByHashName(skin) // TODO provide context
 			mu.Lock()
 			defer mu.Unlock()
 
 			if err != nil {
-				t.l.Warn("error in FindByHashName",
-					zap.String("market", name),
-					zap.String("hash_name", skin),
-					zap.Error(err),
-				)
-
 				responses[name] = make(map[float64]int, 0)
 			} else {
 				responses[name] = res
 			}
-		}()
+		}(name, svc)
 	}
 
 	wg.Wait()
 
 	msg := format(responses)
-
-	t.l.Debug("findByName time to answer", zap.Duration("duration", time.Since(start)))
 
 	return c.Send(msg)
 }

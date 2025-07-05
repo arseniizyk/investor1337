@@ -5,6 +5,13 @@ import (
 	"go.uber.org/zap"
 )
 
+const depositMult = 0.9
+
+type steam struct {
+	data map[string]int
+	l    *zap.Logger
+}
+
 type Response struct {
 	Success        int    `json:"success"`
 	SellOrderCount string `json:"sell_order_count"`
@@ -29,11 +36,6 @@ type Response struct {
 	GraphMaxX       float64         `json:"graph_max_x"`
 	PricePrefix     string          `json:"price_prefix"`
 	PriceSuffix     string          `json:"price_suffix"`
-}
-
-type steam struct {
-	data map[string]int
-	l    *zap.Logger
 }
 
 func New(logger *zap.Logger) (markets.Market, error) {
