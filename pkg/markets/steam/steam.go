@@ -14,7 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-
 func (s steam) FindByHashName(name string) (map[float64]int, error) {
 	url := fmt.Sprintf("https://steamcommunity.com/market/itemordershistogram?norender=1&language=english&currency=1&item_nameid=%d", s.data[strings.ToLower(name)])
 
@@ -78,7 +77,7 @@ func format(r *Response) (map[float64]int, error) {
 			return nil, err
 		}
 
-		results[price*depositMult] = quantity
+		results[price] = quantity
 	}
 
 	return results, nil

@@ -71,7 +71,7 @@ func format(r *Response) map[float64]int {
 			break
 		}
 		if item.Pricing.BasePrice != price {
-			results[price*commissionMult] = count
+			results[price] = count
 			count = 1
 			price = item.Pricing.BasePrice
 			continue

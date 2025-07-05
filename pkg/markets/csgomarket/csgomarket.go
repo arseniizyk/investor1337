@@ -50,7 +50,7 @@ func (cm csgoMarket) FindByHashName(name string) (map[float64]int, error) {
 				break
 			}
 			p := float64(o.Price) / 1000
-			result[p*commissionMultiplier] = o.Count
+			result[p] = o.Count
 		}
 
 		return result, nil

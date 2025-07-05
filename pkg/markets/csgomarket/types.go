@@ -5,8 +5,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const commissionMultiplier = 1.038
-
 type csgoMarket struct {
 	token string
 	l     *zap.Logger

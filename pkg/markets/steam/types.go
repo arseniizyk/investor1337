@@ -5,8 +5,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const depositMult = 0.9
-
 type steam struct {
 	data map[string]int
 	l    *zap.Logger

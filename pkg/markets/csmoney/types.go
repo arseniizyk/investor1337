@@ -5,8 +5,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const commissionMult = 1.042
-
 type csmoney struct {
 	l *zap.Logger
 }
