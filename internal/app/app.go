@@ -5,6 +5,7 @@ import (
 	"github.com/arseniizyk/investor1337/internal/config"
 	"github.com/arseniizyk/investor1337/pkg/markets/csgomarket"
 	"github.com/arseniizyk/investor1337/pkg/markets/csmoney"
+	"github.com/arseniizyk/investor1337/pkg/markets/lisskins"
 	"github.com/arseniizyk/investor1337/pkg/markets/steam"
 	"go.uber.org/zap"
 )
@@ -22,11 +23,12 @@ func (a app) Run() error {
 	cm := csgomarket.New(a.c.CsgoMarketToken(), a.l)
 	csmoney := csmoney.New(a.l)
 	steam, err := steam.New(a.l)
+	ls := lisskins.New(a.c.LisSkinsToken(), a.l)
 	if err != nil {
 		a.l.Error("Cant initialize steam")
 	}
 
-	tbot := bot.New(a.c.TelegramToken(), a.l, cm, csmoney, steam)
+	tbot := bot.New(a.c.TelegramToken(), a.l, cm, csmoney, steam, ls)
 
 	if err := tbot.Run(); err != nil {
 		a.l.Error("Error while runnig tbot", zap.Error(err))

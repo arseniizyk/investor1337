@@ -13,9 +13,14 @@ import (
 )
 
 func (cm csgoMarket) FindByHashName(name string) (map[float64]int, error) {
-	endpoint := fmt.Sprintf("https://market.csgo.com/api/v2/search-item-by-hash-name?key=%s&hash_name=%s", cm.token, url.QueryEscape(name))
+	endpoint := "https://market.csgo.com/api/v2/search-item-by-hash-name"
+	params := url.Values{}
+	params.Set("key", cm.token)
+	params.Set("hash_name", name)
 
-	resp, err := http.Get(endpoint)
+	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+
+	resp, err := http.Get(url)
 	if err != nil {
 		cm.l.Error("cant request csgo market",
 			zap.String("name", name),

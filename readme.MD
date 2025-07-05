@@ -6,9 +6,11 @@ Originally built for cases.
 ---
 
 ## 📦 Markets
+
 -   Monitors prices from:
+    -   [Steam](https://steamcommunity.com/market/)
     -   [CSGO Market](https://market.csgo.com/en/)
-    -   ~~[Lis-Skins](https://lis-skins.com/)~~(cuz i dont have 100usd on it, so maybe in the future)
+    -   [Lis-Skins](https://lis-skins.com/)
     -   [CS.Money](https://cs.money/)
 
 ---
@@ -23,7 +25,7 @@ Originally built for cases.
 
 -   Register and obtain API tokens for:
     -   [CSGO Market](https://market.csgo.com/en/)
-    -   ~~[Lis-Skins](https://lis-skins.com/)~~
+    -   [Lis-Skins](https://lis-skins.com/)
 
 ### 3. Create `.env` file in the root of project
 
@@ -34,6 +36,7 @@ LISSKINS=your_lisskins_token
 ```
 
 ### 4. Run from cmd/app
+
 ```go
 go run main.go
 ```

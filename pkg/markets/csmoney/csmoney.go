@@ -13,10 +13,19 @@ import (
 )
 
 func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
-	url := fmt.Sprintf("https://cs.money/2.0/market/sell-orders?limit=60&offset=0&name=%s&order=asc&sort=price", url.QueryEscape(name))
+	endpoint := "https://cs.money/2.0/market/sell-orders"
+	params := url.Values{}
+	params.Set("limit", "60")
+	params.Set("offset", "0")
+	params.Set("name", name)
+	params.Set("order", "asc")
+	params.Set("sort", "price")
+
+	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
+
 	if err != nil {
 		csm.l.Error("cant make request to cs.money",
 			zap.String("name", name),
@@ -67,7 +76,7 @@ func format(r *Response) map[float64]int {
 	count := 1
 
 	for _, item := range r.Items {
-		if len(results) == markets.MaxOutputs-1 {
+		if len(results) == markets.MaxOutputs {
 			break
 		}
 		if item.Pricing.BasePrice != price {
