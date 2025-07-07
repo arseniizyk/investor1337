@@ -31,8 +31,8 @@ Originally built for cases.
     -   [CSGO Market](https://market.csgo.com/en/)
     -   [Lis-Skins](https://lis-skins.com/)
 
--   **Note**: This step may lead to a ban by CSFLOAT
 -   Log in to [CSFloat](https://csfloat.com/) and retrieve your session cookie from the request.
+-   **Note**: This step may lead to a ban by CSFLOAT
 
 ### 3. Create `.env` file in the root of project
 
