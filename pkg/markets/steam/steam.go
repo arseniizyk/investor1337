@@ -52,10 +52,10 @@ func format(r *Response) (map[float64]int, error) {
 		}
 
 		re := regexp.MustCompile(`\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+|\d+`)
-		comp := re.FindString(orders.Price)
-		clean := strings.ReplaceAll(comp, ",", "")
+		matched := re.FindString(orders.Price)
+		priceString := strings.ReplaceAll(matched, ",", "")
 
-		price, err := strconv.ParseFloat(clean, 64)
+		price, err := strconv.ParseFloat(priceString, 64)
 		if err != nil {
 			return nil, err
 		}
