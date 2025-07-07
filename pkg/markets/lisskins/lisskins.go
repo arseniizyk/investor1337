@@ -13,9 +13,10 @@ import (
 
 func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
 	endpoint := "https://api.lis-skins.com/v1/market/search"
-	params := url.Values{}
-	params.Set("game", "csgo")
-	params.Add("names[]", name)
+	params := url.Values{
+		"game":    []string{"csgo"},
+		"names[]": []string{name},
+	}
 
 	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 

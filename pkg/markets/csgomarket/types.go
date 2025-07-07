@@ -26,6 +26,6 @@ type Response struct {
 	} `json:"data"`
 }
 
-func New(client *http.Client, token string, l *zap.Logger) markets.Market {
-	return csgoMarket{client, token, l}
+func New(c *http.Client, token string, l *zap.Logger) markets.Market {
+	return csgoMarket{c, token, l}
 }

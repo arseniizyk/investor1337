@@ -9,6 +9,7 @@ import (
 	"github.com/arseniizyk/investor1337/internal/config"
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"github.com/arseniizyk/investor1337/pkg/markets/aimmarket"
+	"github.com/arseniizyk/investor1337/pkg/markets/csfloat"
 	"github.com/arseniizyk/investor1337/pkg/markets/csgomarket"
 	"github.com/arseniizyk/investor1337/pkg/markets/csmoney"
 	"github.com/arseniizyk/investor1337/pkg/markets/lisskins"
@@ -46,6 +47,7 @@ func New(cfg config.Config, l *zap.Logger) App {
 		"CS GO Market": csgomarket.New(client, cfg.CsgoMarketToken(), l),
 		"CS.Money":     csmoney.New(client, l),
 		"LIS-SKINS":    lisskins.New(client, cfg.LisSkinsToken(), l),
+		"CSFloat":      csfloat.New(client, cfg.CsfloatCookie(), l),
 	}
 
 	steam, err := steam.New(client, l)

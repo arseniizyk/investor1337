@@ -12,7 +12,7 @@ import (
 
 type steam struct {
 	client *http.Client
-	data   map[string]int
+	items  map[string]int
 	l      *zap.Logger
 }
 
@@ -42,20 +42,20 @@ type Response struct {
 	PriceSuffix     string  `json:"price_suffix"`
 }
 
-func New(client *http.Client, logger *zap.Logger) (markets.Market, error) {
+func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 	s := steam{
-		client: client,
-		l:      logger,
+		client: c,
+		l:      l,
 	}
 
-	if err := s.loadNameIds(); err != nil {
+	if err := s.loadItems(); err != nil {
 		return nil, err
 	}
 
 	return s, nil
 }
 
-func (s *steam) loadNameIds() error {
+func (s *steam) loadItems() error {
 	file, err := os.ReadFile("../cs2ids.json")
 	if err != nil {
 		s.l.Error("Cant load cs2 ids from json", zap.Error(err))
@@ -69,10 +69,10 @@ func (s *steam) loadNameIds() error {
 		return err
 	}
 
-	s.data = make(map[string]int, len(data))
+	s.items = make(map[string]int, len(data))
 	for k, v := range data {
 		lower := strings.ToLower(k)
-		s.data[lower] = v
+		s.items[lower] = v
 	}
 
 	return nil

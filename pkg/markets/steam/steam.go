@@ -13,7 +13,7 @@ import (
 )
 
 func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
-	url := fmt.Sprintf("https://steamcommunity.com/market/itemordershistogram?norender=1&language=english&currency=1&item_nameid=%d", s.data[strings.ToLower(name)])
+	url := fmt.Sprintf("https://steamcommunity.com/market/itemordershistogram?norender=1&language=english&currency=1&item_nameid=%d", s.items[strings.ToLower(name)])
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {

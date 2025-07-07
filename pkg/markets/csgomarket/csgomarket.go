@@ -12,11 +12,15 @@ import (
 	"go.uber.org/zap"
 )
 
+// because csgo market return int, not float64 so we need to divide it by 1000
+const priceDivider = 1000.0
+
 func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
 	endpoint := "https://market.csgo.com/api/v2/search-item-by-hash-name"
-	params := url.Values{}
-	params.Set("key", cm.token)
-	params.Set("hash_name", name)
+	params := url.Values{
+		"key":       []string{cm.token},
+		"hash_name": []string{name},
+	}
 
 	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 
@@ -47,7 +51,7 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 		if len(result) == markets.MaxOutputs {
 			break
 		}
-		p := float64(o.Price) / 1000
+		p := float64(o.Price) / priceDivider
 		result[p] = o.Count
 	}
 

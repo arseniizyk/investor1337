@@ -16,17 +16,20 @@ type Config interface {
 	CsgoMarketToken() string
 	LisSkinsToken() string
 	TelegramToken() string
+	CsfloatCookie() string
 }
 
 type envConfig struct {
 	csgoMarketToken string
 	lisSkinsToken   string
 	telegramToken   string
+	csfloatCookie   string
 }
 
 func (e envConfig) TelegramToken() string   { return e.telegramToken }
 func (e envConfig) CsgoMarketToken() string { return e.csgoMarketToken }
 func (e envConfig) LisSkinsToken() string   { return e.lisSkinsToken }
+func (e envConfig) CsfloatCookie() string   { return e.csfloatCookie }
 
 func New() (Config, error) {
 	cfg, err := loadConfig()
@@ -50,11 +53,12 @@ func loadConfig() (*envConfig, error) {
 		csgoMarketToken: os.Getenv("CSMARKET"),
 		lisSkinsToken:   os.Getenv("LISSKINS"),
 		telegramToken:   os.Getenv("TELEGRAM_BOT"),
+		csfloatCookie:   os.Getenv("CSFLOAT_COOKIE"),
 	}, nil
 }
 
 func (e *envConfig) validate() error {
-	if e.csgoMarketToken == "" || e.lisSkinsToken == "" || e.telegramToken == "" {
+	if e.csgoMarketToken == "" || e.lisSkinsToken == "" || e.telegramToken == "" || e.csfloatCookie == "" {
 		return ErrEmptyEnv
 	}
 

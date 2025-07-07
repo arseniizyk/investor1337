@@ -13,12 +13,13 @@ import (
 
 func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
 	endpoint := "https://cs.money/2.0/market/sell-orders"
-	params := url.Values{}
-	params.Set("limit", "60")
-	params.Set("offset", "0")
-	params.Set("name", name)
-	params.Set("order", "asc")
-	params.Set("sort", "price")
+	params := url.Values{
+		"limit":  []string{"60"},
+		"offset": []string{"0"},
+		"name":   []string{name},
+		"order":  []string{"asc"},
+		"sort":   []string{"price"},
+	}
 
 	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 

@@ -36,6 +36,6 @@ type lisskins struct {
 	l      *zap.Logger
 }
 
-func New(client *http.Client, token string, l *zap.Logger) markets.Market {
-	return &lisskins{client, token, l}
+func New(c *http.Client, token string, l *zap.Logger) markets.Market {
+	return &lisskins{c, token, l}
 }

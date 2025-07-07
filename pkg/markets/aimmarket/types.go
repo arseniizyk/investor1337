@@ -29,8 +29,12 @@ type Response struct {
 	} `json:"data"`
 }
 
-func New(client *http.Client, l *zap.Logger) (markets.Market, error) {
-	am := aimmarket{client: client, l: l}
+func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
+	am := aimmarket{
+		client: c,
+		l:      l,
+	}
+
 	if err := am.loadGraphQlQuery(); err != nil {
 		return nil, err
 	}
