@@ -9,6 +9,7 @@ import (
 	"github.com/arseniizyk/investor1337/internal/config"
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"github.com/arseniizyk/investor1337/pkg/markets/aimmarket"
+	"github.com/arseniizyk/investor1337/pkg/markets/buff163"
 	"github.com/arseniizyk/investor1337/pkg/markets/csfloat"
 	"github.com/arseniizyk/investor1337/pkg/markets/csgomarket"
 	"github.com/arseniizyk/investor1337/pkg/markets/csmoney"
@@ -55,6 +56,13 @@ func New(cfg config.Config, l *zap.Logger) App {
 		l.Warn("Cant initialize steam", zap.Error(err))
 	} else {
 		markets["STEAM"] = steam
+	}
+
+	buff, err := buff163.New(client, l)
+	if err != nil {
+		l.Warn("Cant initialize buff163", zap.Error(err))
+	} else {
+		markets["BUFF163"] = buff
 	}
 
 	am, err := aimmarket.New(client, l)

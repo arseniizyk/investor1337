@@ -24,7 +24,6 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 	}
 
 	r, err := u.DoJSONRequest[Response](ctx, s.client, req, s.l)
-
 	if err != nil {
 		s.l.Warn("response error from steam",
 			zap.String("name", name),

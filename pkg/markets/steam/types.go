@@ -71,8 +71,7 @@ func (s *steam) loadItems() error {
 
 	s.items = make(map[string]int, len(data))
 	for k, v := range data {
-		lower := strings.ToLower(k)
-		s.items[lower] = v
+		s.items[strings.ToLower(k)] = v
 	}
 
 	return nil
