@@ -13,6 +13,7 @@ Originally built for cases.
     -   [Lis-Skins](https://lis-skins.com/)
     -   [CS.Money](https://cs.money/)
     -   [Aim.Market](https://aim.market/)
+    -   [CSFloat](https://csfloat.com/)
 
 ---
 
@@ -22,11 +23,15 @@ Originally built for cases.
 
 -   Use [@BotFather](https://t.me/BotFather) to generate a bot token.
 
-### 2. Get API tokens
+### 2. Get API tokens and Cookies
 
 -   Register and obtain API tokens for:
+
     -   [CSGO Market](https://market.csgo.com/en/)
     -   [Lis-Skins](https://lis-skins.com/)
+
+- **Note**: This step may lead to a ban by CSFLOAT
+- Log in to [CSFloat](https://csfloat.com/) and retrieve your session cookie from the request. 
 
 ### 3. Create `.env` file in the root of project
 
@@ -34,6 +39,7 @@ Originally built for cases.
 TELEGRAM_BOT=your_telegram_token
 CSMARKET=your_csmarket_token
 LISSKINS=your_lisskins_token
+CSFLOAT_COOKIES=your_csfloat_session_cookie
 ```
 
 ### 4. Run from cmd/app

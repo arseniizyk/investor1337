@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// because csgo market return int, not float64 so we need to divide it by 1000
+// because csgo market returns int, not float64 so we need to divide it by 1000
 const priceDivider = 1000.0
 
 func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
