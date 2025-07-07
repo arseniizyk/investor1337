@@ -26,7 +26,7 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		cm.l.Error("cant request csgo market",
+		cm.l.Error("Cant make request to csgo market",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -34,14 +34,14 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 
 	r, err := u.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
 	if err != nil {
-		cm.l.Warn("response error from csgo market",
+		cm.l.Warn("Response error from csgo market",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
 	}
 
 	if !r.Success || len(r.Data) == 0 {
-		cm.l.Warn("csgo market bad request", zap.String("name", name))
+		cm.l.Warn("Csgo market bad request", zap.String("name", name))
 		return nil, errors.New("bad request")
 	}
 

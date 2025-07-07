@@ -27,7 +27,7 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
 	if err != nil {
-		csm.l.Error("cant make request to cs.money",
+		csm.l.Error("Cant make request to cs.money",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -36,7 +36,7 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 	r, err := u.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
 
 	if err != nil {
-		csm.l.Warn("response error from cs.money",
+		csm.l.Warn("Response error from cs.money",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err

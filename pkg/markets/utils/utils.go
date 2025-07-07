@@ -34,14 +34,14 @@ func DoJSONRequest[T any](ctx context.Context, client *http.Client, req *http.Re
 	defer Dclose(resp.Body, logger)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
-		logger.Warn("bad status_code", zap.Int("status_code", resp.StatusCode))
+		logger.Warn("Bad status_code", zap.Int("status_code", resp.StatusCode))
 		return zero, fmt.Errorf("status %d", resp.StatusCode)
 	}
 
 	var res T
 
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		logger.Error("cant decode response", zap.Error(err))
+		logger.Error("Cant decode response", zap.Error(err))
 		return zero, err
 	}
 

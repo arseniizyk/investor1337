@@ -26,7 +26,7 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]i
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		c.l.Error("cant make request to csfloat",
+		c.l.Error("Cant make request to csfloat",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -37,7 +37,7 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]i
 
 	r, err := u.DoJSONRequest[Response](ctx, c.client, req, c.l)
 	if err != nil {
-		c.l.Warn("response error from csfloat",
+		c.l.Warn("Response error from csfloat",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err

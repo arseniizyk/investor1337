@@ -45,7 +45,7 @@ func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 func (am *aimmarket) loadGraphQlQuery() error {
 	query, err := os.ReadFile("../pkg/markets/aimmarket/query.graphql")
 	if err != nil {
-		am.l.Error("cant load GraphQL query file", zap.Error(err))
+		am.l.Error("Cant load GraphQL query file", zap.Error(err))
 		return err
 	}
 

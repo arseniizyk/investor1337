@@ -17,7 +17,7 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		s.l.Error("cant make request to steam",
+		s.l.Error("Cant make request to steam",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -25,7 +25,7 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 
 	r, err := u.DoJSONRequest[Response](ctx, s.client, req, s.l)
 	if err != nil {
-		s.l.Warn("response error from steam",
+		s.l.Warn("Response error from steam",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -33,7 +33,7 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 
 	results, err := format(&r)
 	if err != nil {
-		s.l.Error("cant format response from steam",
+		s.l.Error("Cant format response from steam",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err

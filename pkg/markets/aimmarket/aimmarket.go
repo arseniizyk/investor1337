@@ -16,7 +16,7 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 
 	b, err := json.Marshal(payload)
 	if err != nil {
-		am.l.Error("cant marshal payload in aimmarket",
+		am.l.Error("Cant marshal payload in aimmarket",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -24,7 +24,7 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 
 	req, err := http.NewRequest(http.MethodPost, "https://aim.market/v1/api/graphql", bytes.NewBuffer(b))
 	if err != nil {
-		am.l.Error("cant request aimmarket",
+		am.l.Error("Cant make request to aimmarket",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -35,7 +35,7 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 
 	r, err := u.DoJSONRequest[Response](ctx, am.client, req, am.l)
 	if err != nil {
-		am.l.Warn("response error from aim.market",
+		am.l.Warn("Response error from aim.market",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err

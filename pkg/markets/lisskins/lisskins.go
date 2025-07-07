@@ -25,7 +25,7 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64
 	req.Header.Set("Authorization", "Bearer "+ls.token)
 
 	if err != nil {
-		ls.l.Error("cant request lis-skins",
+		ls.l.Error("Cant make request to lis-skins",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -34,7 +34,7 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64
 	r, err := u.DoJSONRequest[Response](ctx, ls.client, req, ls.l)
 
 	if err != nil {
-		ls.l.Warn("response error from lis-skins",
+		ls.l.Warn("Response error from lis-skins",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err

@@ -28,7 +28,7 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		b.l.Error("cant make request to buff163",
+		b.l.Error("Cant make request to buff163",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -36,7 +36,7 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 
 	r, err := u.DoJSONRequest[Response](ctx, b.client, req, b.l)
 	if err != nil {
-		b.l.Warn("response error from buff163",
+		b.l.Warn("Response error from buff163",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
@@ -51,7 +51,7 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 
 		price, err := strconv.ParseFloat(i.Price, 64)
 		if err != nil {
-			b.l.Error("cant parse to float64",
+			b.l.Error("Cant parse to float64",
 				zap.String("price", i.Price),
 				zap.Error(err))
 			return nil, err
