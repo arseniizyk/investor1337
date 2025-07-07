@@ -1,12 +1,15 @@
 package csmoney
 
 import (
+	"net/http"
+
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
 type csmoney struct {
-	l *zap.Logger
+	client *http.Client
+	l      *zap.Logger
 }
 
 type Response struct {
@@ -62,6 +65,6 @@ type Response struct {
 	} `json:"items"`
 }
 
-func New(l *zap.Logger) markets.Market {
-	return csmoney{l}
+func New(c *http.Client, l *zap.Logger) markets.Market {
+	return csmoney{c, l}
 }

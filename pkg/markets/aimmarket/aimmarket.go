@@ -2,28 +2,17 @@ package aimmarket
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
-	"github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
-func (am aimmarket) FindByHashName(name string) (map[float64]int, error) {
-	payload := map[string]any{
-		"operationName": "ApiBotsInventoryCountAndMinPrice",
-		"query":         string(am.query),
-		"variables": map[string]any{
-			"currency": "USD",
-			"where": map[string]any{
-				"marketHashName": map[string]string{
-					"_text": fmt.Sprintf("\"%s\"", name),
-				},
-			},
-		},
-	}
+func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+	payload := am.preparePayload(name)
 
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -44,44 +33,24 @@ func (am aimmarket) FindByHashName(name string) (map[float64]int, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
-	resp, err := http.DefaultClient.Do(req)
+	r, err := u.DoJSONRequest[Response](ctx, am.client, req, am.l)
 	if err != nil {
-		am.l.Error("bad response from aimmarket",
+		am.l.Warn("response error from aim.market",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
 	}
-	defer utils.Dclose(resp.Body, am.l)
 
-	switch resp.StatusCode {
-	case http.StatusOK:
-		var r Response
-
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			am.l.Error("cant decode response from aimmarket",
-				zap.String("name", name),
-				zap.Int("status_code", resp.StatusCode),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		res := r.Data.BotsInventoryCountAndMinPrice
-		if len(res) == 0 {
-			am.l.Warn("No offers for aimmarket", zap.String("name", name))
-			return nil, errors.New("no offers")
-		}
-
-		p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
-		count := r.Data.BotsInventoryCountAndMinPrice[0].Count
-
-		result := map[float64]int{p: count}
-
-		return result, nil
-	default:
-		am.l.Warn("unknown status_code",
-			zap.Int("status_code", resp.StatusCode),
-			zap.String("name", name))
-		return nil, errors.New("bad response code")
+	res := r.Data.BotsInventoryCountAndMinPrice
+	if len(res) == 0 {
+		am.l.Warn("No offers for aimmarket", zap.String("name", name))
+		return nil, errors.New("no offers")
 	}
+
+	p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
+	count := r.Data.BotsInventoryCountAndMinPrice[0].Count
+
+	result := map[float64]int{p: count}
+
+	return result, nil
 }

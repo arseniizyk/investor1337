@@ -1,13 +1,19 @@
 package steam
 
 import (
+	"encoding/json"
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
 type steam struct {
-	data map[string]int
-	l    *zap.Logger
+	client *http.Client
+	data   map[string]int
+	l      *zap.Logger
 }
 
 type Response struct {
@@ -25,20 +31,21 @@ type Response struct {
 		Price    string `json:"price"`
 		Quantity string `json:"quantity"`
 	} `json:"buy_order_table"`
-	HighestBuyOrder string          `json:"highest_buy_order"`
-	LowestSellOrder string          `json:"lowest_sell_order"`
-	BuyOrderGraph   [][]interface{} `json:"buy_order_graph"`
-	SellOrderGraph  [][]interface{} `json:"sell_order_graph"`
-	GraphMaxY       int             `json:"graph_max_y"`
-	GraphMinX       float64         `json:"graph_min_x"`
-	GraphMaxX       float64         `json:"graph_max_x"`
-	PricePrefix     string          `json:"price_prefix"`
-	PriceSuffix     string          `json:"price_suffix"`
+	HighestBuyOrder string  `json:"highest_buy_order"`
+	LowestSellOrder string  `json:"lowest_sell_order"`
+	BuyOrderGraph   [][]any `json:"buy_order_graph"`
+	SellOrderGraph  [][]any `json:"sell_order_graph"`
+	GraphMaxY       int     `json:"graph_max_y"`
+	GraphMinX       float64 `json:"graph_min_x"`
+	GraphMaxX       float64 `json:"graph_max_x"`
+	PricePrefix     string  `json:"price_prefix"`
+	PriceSuffix     string  `json:"price_suffix"`
 }
 
-func New(logger *zap.Logger) (markets.Market, error) {
+func New(client *http.Client, logger *zap.Logger) (markets.Market, error) {
 	s := steam{
-		l: logger,
+		client: client,
+		l:      logger,
 	}
 
 	if err := s.loadNameIds(); err != nil {
@@ -46,4 +53,27 @@ func New(logger *zap.Logger) (markets.Market, error) {
 	}
 
 	return s, nil
+}
+
+func (s *steam) loadNameIds() error {
+	file, err := os.ReadFile("../cs2ids.json")
+	if err != nil {
+		s.l.Error("Cant load cs2 ids from json", zap.Error(err))
+		return err
+	}
+
+	data := make(map[string]int)
+
+	if err := json.Unmarshal(file, &data); err != nil {
+		s.l.Error("Cant unmarshal cs2 ids", zap.Error(err))
+		return err
+	}
+
+	s.data = make(map[string]int, len(data))
+	for k, v := range data {
+		lower := strings.ToLower(k)
+		s.data[lower] = v
+	}
+
+	return nil
 }

@@ -1,8 +1,7 @@
 package csmoney
 
 import (
-	"encoding/json"
-	"errors"
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -12,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
+func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
 	endpoint := "https://cs.money/2.0/market/sell-orders"
 	params := url.Values{}
 	params.Set("limit", "60")
@@ -33,40 +32,16 @@ func (csm csmoney) FindByHashName(name string) (map[float64]int, error) {
 		return nil, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	r, err := utils.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
+
 	if err != nil {
-		csm.l.Error("cant request cs.money",
+		csm.l.Warn("response error from cs.money",
 			zap.String("name", name),
 			zap.Error(err))
 		return nil, err
 	}
-	defer utils.Dclose(resp.Body, csm.l)
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusNotModified:
-		var r Response
-
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			csm.l.Error("cant decode response from cs.money",
-				zap.String("name", name),
-				zap.Error(err))
-			return nil, err
-		}
-
-		result := format(&r)
-
-		return result, nil
-
-	case http.StatusBadRequest:
-		csm.l.Warn("cs.money status code bad request", zap.String("name", name))
-		return nil, errors.New("bad request")
-
-	default:
-		csm.l.Warn("unknown status code from cs.money",
-			zap.Int("status_code", resp.StatusCode),
-			zap.String("name", name))
-		return nil, errors.New("unknown status code")
-	}
+	return format(&r), nil
 }
 
 func format(r *Response) map[float64]int {

@@ -1,6 +1,7 @@
 package lisskins
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
@@ -30,10 +31,11 @@ type Response struct {
 }
 
 type lisskins struct {
-	token string
-	l     *zap.Logger
+	client *http.Client
+	token  string
+	l      *zap.Logger
 }
 
-func New(token string, l *zap.Logger) markets.Market {
-	return &lisskins{token, l}
+func New(client *http.Client, token string, l *zap.Logger) markets.Market {
+	return &lisskins{client, token, l}
 }

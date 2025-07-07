@@ -1,7 +1,9 @@
 package markets
 
+import "context"
+
 const MaxOutputs = 4
 
 type Market interface {
-	FindByHashName(string) (map[float64]int, error)
+	FindByHashName(ctx context.Context, name string) (map[float64]int, error)
 }

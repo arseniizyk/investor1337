@@ -1,13 +1,16 @@
 package csgomarket
 
 import (
+	"net/http"
+
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
 type csgoMarket struct {
-	token string
-	l     *zap.Logger
+	client *http.Client
+	token  string
+	l      *zap.Logger
 }
 
 type Response struct {
@@ -23,6 +26,6 @@ type Response struct {
 	} `json:"data"`
 }
 
-func New(token string, l *zap.Logger) markets.Market {
-	return csgoMarket{token, l}
+func New(client *http.Client, token string, l *zap.Logger) markets.Market {
+	return csgoMarket{client, token, l}
 }

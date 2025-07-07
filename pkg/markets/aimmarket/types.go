@@ -1,6 +1,7 @@
 package aimmarket
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
@@ -8,8 +9,9 @@ import (
 )
 
 type aimmarket struct {
-	l     *zap.Logger
-	query []byte
+	client *http.Client
+	l      *zap.Logger
+	query  []byte
 }
 
 type Response struct {
@@ -27,8 +29,8 @@ type Response struct {
 	} `json:"data"`
 }
 
-func New(l *zap.Logger) (markets.Market, error) {
-	am := aimmarket{l: l}
+func New(client *http.Client, l *zap.Logger) (markets.Market, error) {
+	am := aimmarket{client: client, l: l}
 	if err := am.loadGraphQlQuery(); err != nil {
 		return nil, err
 	}
