@@ -49,7 +49,7 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 			break
 		}
 
-		price, err := strconv.ParseFloat(i.Price, 10)
+		price, err := strconv.ParseFloat(i.Price, 64)
 		if err != nil {
 			b.l.Error("cant parse to float64",
 				zap.String("price", i.Price),
