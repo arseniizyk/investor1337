@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 	tele "gopkg.in/telebot.v4"
 )
@@ -39,7 +39,7 @@ func (t tbot) findByName(c tele.Context) error {
 	defer cancel()
 
 	start := time.Now()
-	defer utils.RecordLatency(t.l, "findByName time to answer", start)
+	defer u.RecordLatency(t.l, "findByName time to answer", start)
 	responses := t.a.SearchAll(ctx, c.Text())
 
 	msg := format(responses)

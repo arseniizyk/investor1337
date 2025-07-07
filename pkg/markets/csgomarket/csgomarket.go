@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
-	"github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +28,7 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 		return nil, err
 	}
 
-	r, err := utils.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
+	r, err := u.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
 	if err != nil {
 		cm.l.Warn("response error from csgo market",
 			zap.String("name", name),

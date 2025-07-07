@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
-	"github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
@@ -37,7 +37,7 @@ func (a *Aggregator) SearchAll(ctx context.Context, name string) map[string]map[
 			defer wg.Done()
 
 			start := time.Now()
-			defer utils.RecordLatency(a.l, fmt.Sprintf("%s time to answer", marketName), start)
+			defer u.RecordLatency(a.l, fmt.Sprintf("%s time to answer", marketName), start)
 
 			res, err := svc.FindByHashName(ctx, name)
 			mu.Lock()

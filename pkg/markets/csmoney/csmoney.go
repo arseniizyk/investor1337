@@ -7,7 +7,7 @@ import (
 	"net/url"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
-	"github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
@@ -32,7 +32,7 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 		return nil, err
 	}
 
-	r, err := utils.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
+	r, err := u.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
 
 	if err != nil {
 		csm.l.Warn("response error from cs.money",
