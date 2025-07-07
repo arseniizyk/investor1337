@@ -56,7 +56,7 @@ func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 }
 
 func (s *steam) loadItems() error {
-	file, err := os.ReadFile("../cs2ids.json")
+	b, err := os.ReadFile("../cs2ids.json")
 	if err != nil {
 		s.l.Error("Cant load cs2 ids from json", zap.Error(err))
 		return err
@@ -64,7 +64,7 @@ func (s *steam) loadItems() error {
 
 	data := make(map[string]int)
 
-	if err := json.Unmarshal(file, &data); err != nil {
+	if err := json.Unmarshal(b, &data); err != nil {
 		s.l.Error("Cant unmarshal cs2 ids", zap.Error(err))
 		return err
 	}
