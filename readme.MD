@@ -30,8 +30,8 @@ Originally built for cases.
     -   [CSGO Market](https://market.csgo.com/en/)
     -   [Lis-Skins](https://lis-skins.com/)
 
-- **Note**: This step may lead to a ban by CSFLOAT
-- Log in to [CSFloat](https://csfloat.com/) and retrieve your session cookie from the request. 
+-   **Note**: This step may lead to a ban by CSFLOAT
+-   Log in to [CSFloat](https://csfloat.com/) and retrieve your session cookie from the request.
 
 ### 3. Create `.env` file in the root of project
 
@@ -47,3 +47,8 @@ CSFLOAT_COOKIES=your_csfloat_session_cookie
 ```go
 go run main.go
 ```
+
+## Thanks to
+
+-   [somespecialone/steam-item-name-ids](https://github.com/somespecialone/steam-item-name-ids) for steam ids
+-   [ModestSerhat/cs2-marketplace-ids](https://github.com/ModestSerhat/cs2-marketplace-ids) for buff163 ids
