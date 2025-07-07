@@ -29,7 +29,8 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 	if err != nil {
 		csm.l.Error("Cant make request to cs.money",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -38,7 +39,8 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 	if err != nil {
 		csm.l.Warn("Response error from cs.money",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 

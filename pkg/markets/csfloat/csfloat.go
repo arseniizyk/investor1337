@@ -28,7 +28,8 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]i
 	if err != nil {
 		c.l.Error("Cant make request to csfloat",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -39,7 +40,8 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]i
 	if err != nil {
 		c.l.Warn("Response error from csfloat",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 

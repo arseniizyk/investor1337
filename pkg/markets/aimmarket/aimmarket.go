@@ -18,7 +18,8 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 	if err != nil {
 		am.l.Error("Cant marshal payload in aimmarket",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -26,7 +27,8 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 	if err != nil {
 		am.l.Error("Cant make request to aimmarket",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -37,7 +39,8 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 	if err != nil {
 		am.l.Warn("Response error from aim.market",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 

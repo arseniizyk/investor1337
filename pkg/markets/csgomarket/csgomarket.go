@@ -28,7 +28,8 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 	if err != nil {
 		cm.l.Error("Cant make request to csgo market",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -36,7 +37,8 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 	if err != nil {
 		cm.l.Warn("Response error from csgo market",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 

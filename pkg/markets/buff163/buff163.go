@@ -30,7 +30,8 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 	if err != nil {
 		b.l.Error("Cant make request to buff163",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -38,7 +39,8 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 	if err != nil {
 		b.l.Warn("Response error from buff163",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -53,7 +55,8 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 		if err != nil {
 			b.l.Error("Cant parse to float64",
 				zap.String("price", i.Price),
-				zap.Error(err))
+				zap.Error(err),
+			)
 			return nil, err
 		}
 

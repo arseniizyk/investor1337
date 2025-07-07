@@ -27,7 +27,8 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64
 	if err != nil {
 		ls.l.Error("Cant make request to lis-skins",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -36,7 +37,8 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64
 	if err != nil {
 		ls.l.Warn("Response error from lis-skins",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 

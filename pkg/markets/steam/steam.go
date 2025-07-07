@@ -19,7 +19,8 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 	if err != nil {
 		s.l.Error("Cant make request to steam",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -27,7 +28,8 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 	if err != nil {
 		s.l.Warn("Response error from steam",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -35,7 +37,8 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 	if err != nil {
 		s.l.Error("Cant format response from steam",
 			zap.String("name", name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
