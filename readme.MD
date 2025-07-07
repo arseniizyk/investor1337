@@ -52,4 +52,4 @@ go run main.go
 ## Thanks to
 
 -   [somespecialone/steam-item-name-ids](https://github.com/somespecialone/steam-item-name-ids) for steam ids
--   [ModestSerhat/cs2-marketplace-ids](https://github.com/ModestSerhat/cs2-marketplace-ids) for buff163 ids
+-   [ModestSerhat/cs2-marketplace-ids](https://github.com/ModestSerhat/cs2-marketplace-ids) for buff163 goods_ids
