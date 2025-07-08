@@ -10,7 +10,7 @@ func (am *aimmarket) preparePayload(name string) map[string]any {
 			"currency": "USD",
 			"where": map[string]any{
 				"marketHashName": map[string]string{
-					"_text": fmt.Sprintf("\"%s\"", name),
+					"_text": fmt.Sprintf("%q", name),
 				},
 			},
 		},
