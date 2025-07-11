@@ -8,7 +8,7 @@ import (
 	"github.com/arseniizyk/investor1337/internal/aggregator"
 )
 
-func format(res []aggregator.Output) string {
+func format(res []aggregator.MarketInfo) string {
 	var result strings.Builder
 
 	sort.Slice(res, func(i, j int) bool {
