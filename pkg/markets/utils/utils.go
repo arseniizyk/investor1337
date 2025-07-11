@@ -55,3 +55,25 @@ func SortPairs(pairs []markets.Pair) {
 		return pairs[i].Price < pairs[j].Price
 	})
 }
+
+func SinglePair(price float64, count int) []markets.Pair {
+	return []markets.Pair{{
+		Price:    price,
+		Quantity: count,
+	}}
+}
+
+func PairsFromMap(m map[float64]int) []markets.Pair {
+	result := make([]markets.Pair, 0, len(m))
+
+	for price, quantity := range m {
+		result = append(result, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
+	}
+
+	SortPairs(result)
+
+	return result
+}

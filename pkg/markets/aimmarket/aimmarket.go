@@ -67,10 +67,5 @@ func format(r *Response) ([]markets.Pair, error) {
 	p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
 	count := r.Data.BotsInventoryCountAndMinPrice[0].Count
 
-	result := markets.Pair{
-		Price:    p,
-		Quantity: count,
-	}
-
-	return []markets.Pair{result}, nil
+	return u.SinglePair(p, count), nil
 }

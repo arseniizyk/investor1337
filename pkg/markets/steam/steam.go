@@ -48,17 +48,16 @@ func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair,
 
 func format(r *Response) ([]markets.Pair, error) {
 	results := make([]markets.Pair, 0, markets.MaxOutputs)
+	re := regexp.MustCompile(`\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+|\d+`)
 
 	for i, orders := range r.SellOrderTable {
-		if i == 3 {
+		if i == markets.MaxOutputs {
 			break
 		}
 
-		re := regexp.MustCompile(`\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+|\d+`)
 		matched := re.FindString(orders.Price)
-		priceString := strings.ReplaceAll(matched, ",", "")
-
-		price, err := strconv.ParseFloat(priceString, 64)
+		priceStr := strings.ReplaceAll(matched, ",", "")
+		price, err := strconv.ParseFloat(priceStr, 64)
 		if err != nil {
 			return nil, err
 		}

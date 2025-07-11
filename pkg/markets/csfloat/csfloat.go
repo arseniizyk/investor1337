@@ -60,15 +60,5 @@ func format(r *Response) []markets.Pair {
 		countMap[p]++
 	}
 
-	result := make([]markets.Pair, 0, len(countMap))
-	for price, quantity := range countMap {
-		result = append(result, markets.Pair{
-			Price:    price,
-			Quantity: quantity,
-		})
-	}
-
-	u.SortPairs(result)
-
-	return result
+	return u.PairsFromMap(countMap)
 }
