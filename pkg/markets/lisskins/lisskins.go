@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://api.lis-skins.com/v1/market/search"
 	params := url.Values{
 		"game":    []string{"csgo"},
@@ -42,14 +42,29 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) (map[float64
 		return nil, err
 	}
 
-	result := make(map[float64]int, 1)
+	return format(&r), nil
+}
+
+func format(r *Response) []markets.Pair {
+	countMap := make(map[float64]int, markets.MaxOutputs)
 
 	for _, o := range r.Data {
-		if len(result) == markets.MaxOutputs {
+		if len(countMap) == markets.MaxOutputs {
 			break
 		}
-		result[o.Price]++
+		countMap[o.Price]++
 	}
 
-	return result, nil
+	result := make([]markets.Pair, 0, len(countMap))
+
+	for price, quantity := range countMap {
+		result = append(result, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
+	}
+
+	u.SortPairs(result)
+
+	return result
 }

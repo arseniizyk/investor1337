@@ -14,7 +14,7 @@ import (
 // because csfloat returns price in int, not float64
 const priceDivider = 100.0
 
-func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://csfloat.com/api/v1/listings"
 	params := url.Values{
 		"limit":            []string{"0"},
@@ -45,16 +45,30 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) (map[float64]i
 		return nil, err
 	}
 
-	result := make(map[float64]int, 1)
+	return format(&r), nil
+}
+
+func format(r *Response) []markets.Pair {
+	countMap := make(map[float64]int, 1)
 
 	for _, seller := range r.Data {
-		if len(result) == markets.MaxOutputs {
+		if len(countMap) == markets.MaxOutputs {
 			break
 		}
 
 		p := float64(seller.Price) / priceDivider
-		result[p]++
+		countMap[p]++
 	}
 
-	return result, nil
+	result := make([]markets.Pair, 0, len(countMap))
+	for price, quantity := range countMap {
+		result = append(result, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
+	}
+
+	u.SortPairs(result)
+
+	return result
 }

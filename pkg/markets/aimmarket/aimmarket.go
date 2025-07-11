@@ -7,11 +7,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/arseniizyk/investor1337/pkg/markets"
 	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
-func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	payload := am.preparePayload(name)
 
 	b, err := json.Marshal(payload)
@@ -50,10 +51,17 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) (map[float6
 		return nil, errors.New("no offers")
 	}
 
+	return format(&r), nil
+}
+
+func format(r *Response) []markets.Pair {
 	p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
 	count := r.Data.BotsInventoryCountAndMinPrice[0].Count
 
-	result := map[float64]int{p: count}
+	result := markets.Pair{
+		Price:    p,
+		Quantity: count,
+	}
 
-	return result, nil
+	return []markets.Pair{result}
 }

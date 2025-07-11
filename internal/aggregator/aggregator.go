@@ -11,6 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
+type Output struct {
+	Market string
+	Orders []markets.Pair
+}
+
 type Aggregator struct {
 	markets map[string]markets.Market
 	l       *zap.Logger
@@ -23,13 +28,13 @@ func New(markets map[string]markets.Market, l *zap.Logger) *Aggregator {
 	}
 }
 
-func (a *Aggregator) SearchAll(ctx context.Context, name string) map[string]map[float64]int {
+func (a *Aggregator) SearchAll(ctx context.Context, name string) []Output {
 	var (
 		wg = sync.WaitGroup{}
 		mu = sync.Mutex{}
 	)
 
-	responses := make(map[string]map[float64]int, 0)
+	responses := make([]Output, 0)
 
 	for marketName, svc := range a.markets {
 		wg.Add(1)
@@ -44,9 +49,9 @@ func (a *Aggregator) SearchAll(ctx context.Context, name string) map[string]map[
 			defer mu.Unlock()
 
 			if err != nil {
-				responses[marketName] = make(map[float64]int, 0)
+				a.l.Sugar().Error("error in FindByHashName:", marketName)
 			} else {
-				responses[marketName] = res
+				responses = append(responses, Output{Market: marketName, Orders: res})
 			}
 		}()
 	}

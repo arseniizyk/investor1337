@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://cs.money/2.0/market/sell-orders"
 	params := url.Values{
 		"limit":  []string{"60"},
@@ -47,26 +47,26 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) (map[float64
 	return format(&r), nil
 }
 
-func format(r *Response) map[float64]int {
-	results := make(map[float64]int)
-
-	price := r.Items[0].Pricing.BasePrice
-	count := 1
+func format(r *Response) []markets.Pair {
+	countMap := make(map[float64]int, markets.MaxOutputs)
 
 	for _, item := range r.Items {
-		if len(results) == markets.MaxOutputs {
+		if len(countMap) == markets.MaxOutputs {
 			break
 		}
-		if item.Pricing.BasePrice != price {
-			results[price] = count
-			count = 1
-			price = item.Pricing.BasePrice
-			continue
-		}
-		count++
+		countMap[item.Pricing.BasePrice]++
 	}
 
-	results[price] = count
+	result := make([]markets.Pair, 0, len(countMap))
 
-	return results
+	for price, quantity := range countMap {
+		result = append(result, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
+	}
+
+	u.SortPairs(result)
+
+	return result
 }

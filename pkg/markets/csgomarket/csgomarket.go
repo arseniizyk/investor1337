@@ -15,7 +15,7 @@ import (
 // because csgo market returns int, not float64 so we need to divide it by 1000
 const priceDivider = 1000.0
 
-func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://market.csgo.com/api/v2/search-item-by-hash-name"
 	params := url.Values{
 		"key":       []string{cm.token},
@@ -47,15 +47,24 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) (map[float
 		return nil, errors.New("bad request")
 	}
 
-	result := make(map[float64]int, 1)
+	return format(&r), nil
+}
+
+func format(r *Response) []markets.Pair {
+	result := make([]markets.Pair, 0, markets.MaxOutputs)
 
 	for _, o := range r.Data {
 		if len(result) == markets.MaxOutputs {
 			break
 		}
 		p := float64(o.Price) / priceDivider
-		result[p] = o.Count
+		result = append(result, markets.Pair{
+			Price:    p,
+			Quantity: o.Count,
+		})
 	}
 
-	return result, nil
+	u.SortPairs(result)
+
+	return result
 }

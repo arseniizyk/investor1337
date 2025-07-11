@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"time"
 
+	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
@@ -46,4 +48,10 @@ func DoJSONRequest[T any](ctx context.Context, client *http.Client, req *http.Re
 	}
 
 	return res, nil
+}
+
+func SortPairs(pairs []markets.Pair) {
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].Price < pairs[j].Price
+	})
 }

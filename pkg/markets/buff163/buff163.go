@@ -16,7 +16,7 @@ import (
 
 const priceMultiplier = 0.14 // convert CNY to USD
 
-func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (b buff163) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://buff.163.com/api/market/goods/sell_order"
 	goodsId := strconv.Itoa(b.items[strings.ToLower(name)])
 	params := url.Values{
@@ -44,25 +44,45 @@ func (b buff163) FindByHashName(ctx context.Context, name string) (map[float64]i
 		return nil, err
 	}
 
-	result := make(map[float64]int, 1)
+	result, err := format(&r)
+	if err != nil {
+		b.l.Error("cant format output from buff163",
+			zap.String("name", name),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func format(r *Response) ([]markets.Pair, error) {
+	countMap := make(map[float64]int, 1)
 
 	for _, i := range r.Data.Items {
-		if len(result) == markets.MaxOutputs {
+		if len(countMap) == markets.MaxOutputs {
 			break
 		}
 
 		price, err := strconv.ParseFloat(i.Price, 64)
 		if err != nil {
-			b.l.Error("Cant parse to float64",
-				zap.String("price", i.Price),
-				zap.Error(err),
-			)
-			return nil, err
+			return nil, fmt.Errorf("cant parse to float64: price: %s, err: %v", i.Price, err)
 		}
 
 		p := math.Round(price*priceMultiplier*100) / 100
-		result[p]++
+		countMap[p]++
 	}
+
+	result := make([]markets.Pair, 0, len(countMap))
+
+	for price, quantity := range countMap {
+		result = append(result, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
+	}
+
+	u.SortPairs(result)
 
 	return result, nil
 }

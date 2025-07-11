@@ -8,11 +8,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arseniizyk/investor1337/pkg/markets"
 	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
 	"go.uber.org/zap"
 )
 
-func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int, error) {
+func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	url := fmt.Sprintf("https://steamcommunity.com/market/itemordershistogram?norender=1&language=english&currency=1&item_nameid=%d", s.items[strings.ToLower(name)])
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -45,8 +46,8 @@ func (s steam) FindByHashName(ctx context.Context, name string) (map[float64]int
 	return results, nil
 }
 
-func format(r *Response) (map[float64]int, error) {
-	results := make(map[float64]int)
+func format(r *Response) ([]markets.Pair, error) {
+	results := make([]markets.Pair, 0, markets.MaxOutputs)
 
 	for i, orders := range r.SellOrderTable {
 		if i == 3 {
@@ -67,8 +68,13 @@ func format(r *Response) (map[float64]int, error) {
 			return nil, err
 		}
 
-		results[price] = quantity
+		results = append(results, markets.Pair{
+			Price:    price,
+			Quantity: quantity,
+		})
 	}
+
+	u.SortPairs(results)
 
 	return results, nil
 }
