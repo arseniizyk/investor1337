@@ -12,6 +12,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var ErrNoOffers = errors.New("no offers")
+
 func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	payload := am.preparePayload(name)
 
@@ -45,16 +47,23 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.
 		return nil, err
 	}
 
-	res := r.Data.BotsInventoryCountAndMinPrice
-	if len(res) == 0 {
-		am.l.Warn("No offers for aimmarket", zap.String("name", name))
-		return nil, errors.New("no offers")
+	result, err := format(&r)
+	if err != nil {
+		am.l.Warn("no offers for aimmarket",
+			zap.String("name", name),
+		)
+		return nil, err
 	}
 
-	return format(&r), nil
+	return result, nil
 }
 
-func format(r *Response) []markets.Pair {
+func format(r *Response) ([]markets.Pair, error) {
+	res := r.Data.BotsInventoryCountAndMinPrice
+	if len(res) == 0 {
+		return nil, ErrNoOffers
+	}
+
 	p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
 	count := r.Data.BotsInventoryCountAndMinPrice[0].Count
 
@@ -63,5 +72,5 @@ func format(r *Response) []markets.Pair {
 		Quantity: count,
 	}
 
-	return []markets.Pair{result}
+	return []markets.Pair{result}, nil
 }
