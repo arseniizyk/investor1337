@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -49,7 +49,7 @@ func (a *Aggregator) SearchAll(ctx context.Context, name string) []Output {
 			defer mu.Unlock()
 
 			if err != nil {
-				a.l.Sugar().Error("error in FindByHashName:", marketName)
+				responses = append(responses, Output{Market: marketName, Orders: nil})
 			} else {
 				responses = append(responses, Output{Market: marketName, Orders: res})
 			}

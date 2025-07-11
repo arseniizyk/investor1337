@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/markets/utils"
+	u "github.com/arseniizyk/investor1337/pkg/utils"
 	"go.uber.org/zap"
 )
 

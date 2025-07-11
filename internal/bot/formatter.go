@@ -12,6 +12,19 @@ func format(res []aggregator.Output) string {
 	var result strings.Builder
 
 	sort.Slice(res, func(i, j int) bool {
+		isEmptyI := len(res[i].Orders) == 0
+		isEmptyJ := len(res[j].Orders) == 0
+
+		if isEmptyI && isEmptyJ {
+			return false
+		}
+		if isEmptyI {
+			return false
+		}
+		if isEmptyJ {
+			return true
+		}
+
 		return res[i].Orders[0].Price < res[j].Orders[0].Price
 	})
 
