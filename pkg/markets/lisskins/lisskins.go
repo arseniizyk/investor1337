@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"unicode"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	u "github.com/arseniizyk/investor1337/pkg/utils"
@@ -43,6 +45,30 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.P
 	}
 
 	return format(&r), nil
+}
+
+func (ls lisskins) URL(name string) string {
+	var last rune
+	formatted := strings.Map(func(r rune) rune {
+		switch r {
+		case '(', ')', '|', ':', ',', '.', '’', '"', '\'':
+			return -1
+		case ' ':
+			if last == '-' {
+				return -1 // to avoid double -
+			}
+			last = '-'
+			return '-'
+		default:
+			lower := unicode.ToLower(r)
+			last = lower
+			return lower
+		}
+	}, name)
+
+	formatted = strings.Trim(formatted, "-")
+
+	return "https://lis-skins.com/ru/market/csgo/" + formatted
 }
 
 func format(r *Response) []markets.Pair {

@@ -14,6 +14,7 @@ import (
 type MarketInfo struct {
 	Market string
 	Orders []markets.Pair
+	URL    string
 }
 
 type Aggregator struct {
@@ -45,13 +46,22 @@ func (a *Aggregator) SearchAll(ctx context.Context, name string) []MarketInfo {
 			defer u.RecordLatency(a.l, fmt.Sprintf("%s time to answer", marketName), start)
 
 			res, err := svc.FindByHashName(ctx, name)
+			url := svc.URL(name)
 			mu.Lock()
 			defer mu.Unlock()
 
 			if err != nil {
-				responses = append(responses, MarketInfo{Market: marketName, Orders: nil})
+				responses = append(responses, MarketInfo{
+					Market: marketName,
+					Orders: nil,
+					URL:    "",
+				})
 			} else {
-				responses = append(responses, MarketInfo{Market: marketName, Orders: res})
+				responses = append(responses, MarketInfo{
+					Market: marketName,
+					Orders: res,
+					URL:    url,
+				})
 			}
 		}()
 	}

@@ -48,6 +48,10 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 	return format(&r), nil
 }
 
+func (c csfloat) URL(name string) string {
+	return "https://csfloat.com/search?market_hash_name=" + url.PathEscape(name)
+}
+
 func format(r *Response) []markets.Pair {
 	countMap := make(map[float64]int, 1)
 

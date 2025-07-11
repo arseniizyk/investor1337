@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	u "github.com/arseniizyk/investor1337/pkg/utils"
@@ -56,6 +57,10 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.
 	}
 
 	return result, nil
+}
+
+func (am aimmarket) URL(name string) string {
+	return "https://aim.market/ru/buy/csgo/" + url.PathEscape(name)
 }
 
 func format(r *Response) ([]markets.Pair, error) {

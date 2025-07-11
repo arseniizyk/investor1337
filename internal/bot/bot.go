@@ -43,5 +43,5 @@ func (t tbot) findByName(c tele.Context) error {
 	responses := t.a.SearchAll(ctx, c.Text())
 
 	msg := format(responses)
-	return c.Send(msg)
+	return c.Send(msg, tele.ModeMarkdown, tele.NoPreview)
 }

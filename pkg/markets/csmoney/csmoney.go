@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"unicode"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	u "github.com/arseniizyk/investor1337/pkg/utils"
@@ -45,6 +47,32 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]markets.P
 	}
 
 	return format(&r), nil
+}
+
+func (csm csmoney) URL(name string) string {
+	var last rune
+	formatted := strings.Map(func(r rune) rune {
+		switch r {
+		case '(', ')', '|', '&', ':', ',', '.', '’', '"', '\'', '★':
+			return -1
+		case ' ':
+			if last == '-' {
+				return -1 // to avoid double -
+			}
+			last = '-'
+			return '-'
+		default:
+			lower := unicode.ToLower(r)
+			last = lower
+			return lower
+		}
+	}, name)
+
+	formatted = strings.Trim(formatted, "-")
+
+	return "https://cs.money/ru/csgo/" + formatted
+
+	// return "https://cs.money/ru/market/buy/" for simplicity, because the code above doesn't work for all items(like doppler knives)
 }
 
 func format(r *Response) []markets.Pair {

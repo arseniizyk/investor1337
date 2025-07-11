@@ -50,6 +50,10 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]markets
 	return format(&r), nil
 }
 
+func (cm csgoMarket) URL(name string) string {
+	return "https://market.csgo.com/en/" + url.PathEscape(name)
+}
+
 func format(r *Response) []markets.Pair {
 	result := make([]markets.Pair, 0, markets.MaxOutputs)
 

@@ -6,6 +6,7 @@ const MaxOutputs = 4
 
 type Market interface {
 	FindByHashName(ctx context.Context, name string) ([]Pair, error)
+	URL(name string) string
 }
 
 type Pair struct {

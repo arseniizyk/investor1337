@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,6 +45,10 @@ func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair,
 	}
 
 	return results, nil
+}
+
+func (s steam) URL(name string) string {
+	return "https://steamcommunity.com/market/listings/730/" + url.PathEscape(name)
 }
 
 func format(r *Response) ([]markets.Pair, error) {

@@ -34,7 +34,7 @@ func format(res []aggregator.MarketInfo) string {
 			continue
 		}
 
-		result.WriteString(fmt.Sprintf("%s\n", output.Market))
+		result.WriteString(fmt.Sprintf("[%s](%s)\n", output.Market, output.URL))
 		for _, pair := range output.Orders {
 			result.WriteString(fmt.Sprintf("Price: $%.2f | %d\n", pair.Price, pair.Quantity))
 		}

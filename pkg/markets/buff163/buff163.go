@@ -56,6 +56,10 @@ func (b buff163) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 	return result, nil
 }
 
+func (b buff163) URL(name string) string {
+	return "https://buff.163.com/goods/" + strconv.Itoa(b.items[strings.ToLower(name)])
+}
+
 func format(r *Response) ([]markets.Pair, error) {
 	countMap := make(map[float64]int, 1)
 
