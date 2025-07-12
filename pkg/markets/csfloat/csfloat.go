@@ -13,7 +13,7 @@ import (
 
 // because csfloat returns price in int, not float64
 const (
-	maxPages     = 7
+	maxPages     = 7 // 50 items per page
 	priceDivider = 100.0
 )
 
@@ -25,10 +25,14 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 		"sort_by":          []string{"lowest_price"},
 	}
 
-	countMap := make(map[float64]int)
+	countMap := make(map[float64]int, markets.MaxOutputs)
 	cursor := ""
 
 	for range maxPages {
+		if len(countMap) == markets.MaxOutputs {
+			break
+		}
+
 		if cursor != "" {
 			params.Set("cursor", cursor)
 		}
@@ -56,18 +60,23 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 			return nil, err
 		}
 
-		if r.Cursor == "" || len(r.Data) == 0 || len(countMap) == markets.MaxOutputs {
+		if len(r.Data) == 0 {
 			break
 		}
 
 		countInMap(countMap, &r)
-		cursor = r.Cursor
 
 		c.l.Debug("CSFloat Fetched page",
 			zap.String("name", name),
 			zap.Int("items", len(r.Data)),
-			zap.String("cursor", r.Cursor),
+			zap.String("cursor", cursor),
 		)
+
+		cursor = r.Cursor
+
+		if r.Cursor == "" {
+			break
+		}
 	}
 
 	return u.PairsFromMap(countMap), nil
