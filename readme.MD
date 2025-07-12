@@ -33,6 +33,7 @@ Originally built for cases.
 
 -   Log in to [CSFloat](https://csfloat.com/) and retrieve your session cookie from the request.
 -   **Note**: This step may lead to a ban by CSFLOAT
+-   **Note**: You need to update it every 5 days
 
 ### 3. Create `.env` file in the root of project
 
