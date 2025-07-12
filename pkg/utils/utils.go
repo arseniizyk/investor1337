@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +12,15 @@ import (
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
+)
+
+type Response interface {
+	LenData() int
+	Cursor() string
+}
+
+var (
+	ErrRequest = errors.New("cant make request")
 )
 
 func Dclose(c io.Closer, l *zap.Logger) {
@@ -48,6 +58,59 @@ func DoJSONRequest[T any](ctx context.Context, client *http.Client, req *http.Re
 	}
 
 	return res, nil
+}
+
+func FetchWithCursor[T Response](
+	ctx context.Context, client *http.Client, l *zap.Logger,
+	name, marketName string,
+	maxPages int,
+	countInMap func(m map[float64]int, r *T),
+	buildRequest func(cursor, name string) (*http.Request, error)) (map[float64]int, error) {
+
+	countMap := make(map[float64]int, markets.MaxOutputs)
+	cursor := ""
+
+	for i := range maxPages {
+		if len(countMap) == markets.MaxOutputs {
+			break
+		}
+
+		req, err := buildRequest(cursor, name)
+		if err != nil {
+			return nil, err
+		}
+
+		r, err := DoJSONRequest[T](ctx, client, req, l)
+		if err != nil {
+			l.Warn("Response error",
+				zap.String("market", marketName),
+				zap.String("name", name),
+				zap.Error(err),
+			)
+			return nil, err
+		}
+
+		countInMap(countMap, &r)
+
+		l.Debug("Fetched page",
+			zap.String("market", marketName),
+			zap.Int("page", i),
+			zap.String("name", name),
+			zap.String("cursor", cursor),
+		)
+
+		if r.Cursor() == "" {
+			break
+		}
+
+		cursor = r.Cursor()
+
+		if r.LenData() == 0 {
+			break
+		}
+	}
+
+	return countMap, nil
 }
 
 func SortPairs(pairs []markets.Pair) {

@@ -15,66 +15,42 @@ import (
 
 const maxPages = 5 // 200 items per page
 
-func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (ls lisskins) buildRequest(cursor, name string) (*http.Request, error) {
 	endpoint := "https://api.lis-skins.com/v1/market/search"
 	params := url.Values{
 		"game":    []string{"csgo"},
 		"names[]": []string{name},
 	}
 
-	countMap := make(map[float64]int, markets.MaxOutputs)
-	cursor := ""
+	if cursor != "" {
+		params.Set("cursor", cursor)
+	}
 
-	for range maxPages {
-		if len(countMap) == markets.MaxOutputs {
-			break
-		}
+	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 
-		if cursor != "" {
-			params.Set("cursor", cursor)
-		}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+ls.token)
 
-		url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
-
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Accept", "application/json")
-		req.Header.Set("Authorization", "Bearer "+ls.token)
-
-		if err != nil {
-			ls.l.Error("Cant make request to lis-skins",
-				zap.String("name", name),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		r, err := u.DoJSONRequest[Response](ctx, ls.client, req, ls.l)
-
-		if err != nil {
-			ls.l.Warn("Response error from lis-skins",
-				zap.String("name", name),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		if len(r.Data) == 0 {
-			break
-		}
-
-		countInMap(countMap, &r)
-
-		ls.l.Debug("LIS-SKINS Fetched page",
+	if err != nil {
+		ls.l.Error("Cant make request to lis-skins",
 			zap.String("name", name),
-			zap.Int("items", len(r.Data)),
-			zap.String("cursor", cursor),
+			zap.Error(err),
 		)
+		return nil, u.ErrRequest
+	}
 
-		cursor = r.Meta.NextCursor
+	return req, nil
+}
 
-		if r.Meta.NextCursor == "" {
-			break
-		}
+func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+	countMap, err := u.FetchWithCursor(ctx, ls.client, ls.l, name, "LIS-SKINS", maxPages, countInMap, ls.buildRequest)
+	if err != nil {
+		ls.l.Warn("LIS-SKINS error in FetchWithCursor",
+			zap.String("name", name),
+			zap.Error(err),
+		)
+		return nil, err
 	}
 
 	return u.PairsFromMap(countMap), nil

@@ -17,7 +17,15 @@ type Response struct {
 	Data []struct {
 		Price int `json:"price"`
 	} `json:"data"`
-	Cursor string `json:"cursor"`
+	NextCursor string `json:"cursor"`
+}
+
+func (r Response) LenData() int {
+	return len(r.Data)
+}
+
+func (r Response) Cursor() string {
+	return r.NextCursor
 }
 
 func New(c *http.Client, cookie string, l *zap.Logger) markets.Market {

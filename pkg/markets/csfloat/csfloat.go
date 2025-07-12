@@ -13,11 +13,11 @@ import (
 
 // because csfloat returns price in int, not float64
 const (
-	maxPages     = 7 // 50 items per page
+	maxPages     = 5 // 50 items per page
 	priceDivider = 100.0
 )
 
-func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (c csfloat) buildRequest(cursor, name string) (*http.Request, error) {
 	endpoint := "https://csfloat.com/api/v1/listings"
 	params := url.Values{
 		"limit":            []string{"0"},
@@ -25,58 +25,36 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 		"sort_by":          []string{"lowest_price"},
 	}
 
-	countMap := make(map[float64]int, markets.MaxOutputs)
-	cursor := ""
+	if cursor != "" {
+		params.Set("cursor", cursor)
+	}
 
-	for range maxPages {
-		if len(countMap) == markets.MaxOutputs {
-			break
-		}
+	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
 
-		if cursor != "" {
-			params.Set("cursor", cursor)
-		}
-
-		url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
-
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			c.l.Error("Cant make request to csfloat",
-				zap.String("name", name),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		req.Header.Add("Cookie", c.cookie)
-		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
-
-		r, err := u.DoJSONRequest[Response](ctx, c.client, req, c.l)
-		if err != nil {
-			c.l.Warn("Response error from csfloat",
-				zap.String("name", name),
-				zap.Error(err),
-			)
-			return nil, err
-		}
-
-		if len(r.Data) == 0 {
-			break
-		}
-
-		countInMap(countMap, &r)
-
-		c.l.Debug("CSFloat Fetched page",
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		c.l.Error("Cant make request to CSFloat",
 			zap.String("name", name),
-			zap.Int("items", len(r.Data)),
-			zap.String("cursor", cursor),
+			zap.Error(err),
 		)
+		return nil, u.ErrRequest
+	}
 
-		cursor = r.Cursor
+	req.Header.Add("Cookie", c.cookie)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
-		if r.Cursor == "" {
-			break
-		}
+	return req, nil
+}
+
+func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+	countMap, err := u.FetchWithCursor(ctx, c.client, c.l, name, "CSFloat", maxPages, countInMap, c.buildRequest)
+
+	if err != nil {
+		c.l.Warn("CSFloat error in FetchWithCursor",
+			zap.String("name", name),
+			zap.Error(err),
+		)
+		return nil, err
 	}
 
 	return u.PairsFromMap(countMap), nil

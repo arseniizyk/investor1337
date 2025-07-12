@@ -16,6 +16,14 @@ type Response struct {
 	} `json:"meta"`
 }
 
+func (r Response) LenData() int {
+	return len(r.Data)
+}
+
+func (r Response) Cursor() string {
+	return r.Meta.NextCursor
+}
+
 type lisskins struct {
 	client *http.Client
 	token  string
