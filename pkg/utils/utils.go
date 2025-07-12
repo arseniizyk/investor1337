@@ -20,7 +20,8 @@ type Response interface {
 }
 
 var (
-	ErrRequest = errors.New("cant make request")
+	ErrResponse = errors.New("bad response")
+	ErrRequest  = errors.New("cant make request")
 )
 
 func Dclose(c io.Closer, l *zap.Logger) {
@@ -87,7 +88,7 @@ func FetchWithCursor[T Response](
 				zap.String("name", name),
 				zap.Error(err),
 			)
-			return nil, err
+			return nil, ErrResponse
 		}
 
 		countInMap(countMap, &r)
