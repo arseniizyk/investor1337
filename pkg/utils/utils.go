@@ -81,7 +81,7 @@ func FetchWithCursor[T Response](
 		}
 
 		r, err := DoJSONRequest[T](ctx, client, req, l)
-		if err != nil {
+		if err != nil || r.LenData() == 0 {
 			l.Warn("Response error",
 				zap.String("market", marketName),
 				zap.String("name", name),
