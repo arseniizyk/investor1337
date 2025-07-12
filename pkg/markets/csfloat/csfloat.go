@@ -12,7 +12,10 @@ import (
 )
 
 // because csfloat returns price in int, not float64
-const priceDivider = 100.0
+const (
+	maxPages     = 7
+	priceDivider = 100.0
+)
 
 func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
 	endpoint := "https://csfloat.com/api/v1/listings"
@@ -22,47 +25,65 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 		"sort_by":          []string{"lowest_price"},
 	}
 
-	url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+	countMap := make(map[float64]int)
+	cursor := ""
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		c.l.Error("Cant make request to csfloat",
+	for range maxPages {
+		if cursor != "" {
+			params.Set("cursor", cursor)
+		}
+
+		url := fmt.Sprintf("%s?%s", endpoint, params.Encode())
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			c.l.Error("Cant make request to csfloat",
+				zap.String("name", name),
+				zap.Error(err),
+			)
+			return nil, err
+		}
+
+		req.Header.Add("Cookie", c.cookie)
+		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
+
+		r, err := u.DoJSONRequest[Response](ctx, c.client, req, c.l)
+		if err != nil {
+			c.l.Warn("Response error from csfloat",
+				zap.String("name", name),
+				zap.Error(err),
+			)
+			return nil, err
+		}
+
+		if r.Cursor == "" || len(r.Data) == 0 || len(countMap) == markets.MaxOutputs {
+			break
+		}
+
+		countInMap(countMap, &r)
+		cursor = r.Cursor
+
+		c.l.Debug("CSFloat Fetched page",
 			zap.String("name", name),
-			zap.Error(err),
+			zap.Int("items", len(r.Data)),
+			zap.String("cursor", r.Cursor),
 		)
-		return nil, err
 	}
 
-	req.Header.Add("Cookie", c.cookie)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
-
-	r, err := u.DoJSONRequest[Response](ctx, c.client, req, c.l)
-	if err != nil {
-		c.l.Warn("Response error from csfloat",
-			zap.String("name", name),
-			zap.Error(err),
-		)
-		return nil, err
-	}
-
-	return format(&r), nil
+	return u.PairsFromMap(countMap), nil
 }
 
 func (c csfloat) URL(name string) string {
 	return "https://csfloat.com/search?market_hash_name=" + url.PathEscape(name)
 }
 
-func format(r *Response) []markets.Pair {
-	countMap := make(map[float64]int, 1)
-
+func countInMap(m map[float64]int, r *Response) {
 	for _, seller := range r.Data {
-		if len(countMap) == markets.MaxOutputs {
+		if len(m) == markets.MaxOutputs {
 			break
 		}
 
 		p := float64(seller.Price) / priceDivider
-		countMap[p]++
+		m[p]++
 	}
-
-	return u.PairsFromMap(countMap)
 }
