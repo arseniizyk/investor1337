@@ -2,6 +2,7 @@ package buff163
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -36,6 +37,11 @@ func (b buff163) FindByHashName(ctx context.Context, name string) ([]m.Pair, err
 
 	r, err := m.DoJSONRequest[Response](ctx, b.client, req, b.l)
 	if err != nil {
+		if errors.Is(err, m.ErrNoOffers) {
+			b.l.Warn("No offers for buff163", zap.String("name", name))
+			return nil, err
+		}
+		
 		b.l.Warn("Response error from buff163",
 			zap.String("name", name),
 			zap.Error(err),

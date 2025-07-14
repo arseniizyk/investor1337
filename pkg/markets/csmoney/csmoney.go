@@ -2,6 +2,7 @@ package csmoney
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -28,6 +29,11 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]m.Pair, e
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
 	if err != nil {
+		if errors.Is(err, m.ErrNoOffers) {
+			csm.l.Warn("No offers for cs.money", zap.String("name", name))
+			return nil, err
+		}
+
 		csm.l.Error("Cant make request to cs.money",
 			zap.String("name", name),
 			zap.Error(err),

@@ -50,7 +50,7 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]m.Pair, err
 	countMap, err := m.FetchWithCursor(ctx, c.client, c.l, name, "CSFloat", maxPages, countInMap, c.buildRequest)
 
 	if err != nil {
-		if errors.Is(err, m.ErrEmptyResponse) {
+		if errors.Is(err, m.ErrNoOffers) {
 			c.l.Warn("CSFloat no offers", zap.String("name", name))
 			return nil, m.ErrNoOffers
 		}

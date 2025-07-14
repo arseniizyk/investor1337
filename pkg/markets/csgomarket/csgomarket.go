@@ -2,6 +2,7 @@ package csgomarket
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -33,6 +34,11 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]m.Pair,
 
 	r, err := m.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
 	if err != nil {
+		if errors.Is(err, m.ErrNoOffers) {
+			cm.l.Warn("No offers for csgo market", zap.String("name", name))
+			return nil, err
+		}
+		
 		cm.l.Warn("Response error from csgo market",
 			zap.String("name", name),
 			zap.Error(err),

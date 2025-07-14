@@ -2,6 +2,7 @@ package steam
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -27,6 +28,11 @@ func (s steam) FindByHashName(ctx context.Context, name string) ([]m.Pair, error
 
 	r, err := m.DoJSONRequest[Response](ctx, s.client, req, s.l)
 	if err != nil {
+		if errors.Is(err, m.ErrNoOffers) {
+			s.l.Warn("No offers for steam", zap.String("name", name))
+			return nil, err
+		}
+
 		s.l.Warn("Response error from steam",
 			zap.String("name", name),
 			zap.Error(err),

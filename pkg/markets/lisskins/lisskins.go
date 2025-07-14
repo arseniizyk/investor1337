@@ -46,7 +46,7 @@ func (ls lisskins) buildRequest(cursor, name string) (*http.Request, error) {
 func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	countMap, err := m.FetchWithCursor(ctx, ls.client, ls.l, name, "LIS-SKINS", maxPages, countInMap, ls.buildRequest)
 	if err != nil {
-		if errors.Is(err, m.ErrEmptyResponse) {
+		if errors.Is(err, m.ErrNoOffers) {
 			ls.l.Warn("LIS-SKINS no offers", zap.String("name", name))
 			return nil, m.ErrNoOffers
 		}

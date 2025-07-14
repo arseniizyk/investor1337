@@ -19,7 +19,6 @@ var (
 	ErrRequestFailed = errors.New("failed to build HTTP request")
 	ErrBadStatusCode = errors.New("unexpected HTTP status code")
 	ErrDecodeJSON    = errors.New("failed to decode JSON response")
-	ErrEmptyResponse = errors.New("empty or invalid response")
 )
 
 type Market interface {
@@ -45,6 +44,10 @@ func DoJSONRequest[T any](ctx context.Context, client *http.Client, req *http.Re
 	defer utils.Dclose(resp.Body, logger)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
+		if resp.StatusCode == http.StatusBadRequest {
+			logger.Warn("Bad Request, no offers", zap.String("host", req.Host), zap.String("query", req.URL.RawQuery))
+			return zero, ErrNoOffers
+		}
 		logger.Warn("Bad status_code", zap.Int("status_code", resp.StatusCode))
 		return zero, ErrBadStatusCode
 	}
@@ -86,12 +89,12 @@ func FetchWithCursor[T Response](
 
 		r, err := DoJSONRequest[T](ctx, client, req, l)
 		if err != nil || r.LenData() == 0 {
-			l.Warn("Response error",
+			l.Warn("No offers",
 				zap.String("market", marketName),
 				zap.String("name", name),
 				zap.Error(err),
 			)
-			return nil, ErrEmptyResponse
+			return nil, ErrNoOffers
 		}
 
 		countInMap(countMap, &r)

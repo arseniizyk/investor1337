@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 
@@ -37,6 +38,11 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]m.Pair, 
 
 	r, err := m.DoJSONRequest[Response](ctx, am.client, req, am.l)
 	if err != nil {
+		if errors.Is(err, m.ErrNoOffers) {
+			am.l.Warn("No offers for aimmarket", zap.String("name", name))
+			return nil, err
+		}
+
 		am.l.Warn("Response error from aim.market",
 			zap.String("name", name),
 			zap.Error(err),
@@ -46,10 +52,10 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]m.Pair, 
 
 	result, err := format(&r)
 	if err != nil {
-		am.l.Warn("no offers for aimmarket",
+		am.l.Warn("cant format output from aimmarket, no offers",
 			zap.String("name", name),
 		)
-		return nil, m.ErrNoOffers
+		return nil, m.ErrFormatFailed
 	}
 
 	return result, nil
