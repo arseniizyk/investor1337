@@ -9,14 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
 const priceMultiplier = 0.14 // convert CNY to USD
 
-func (b buff163) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (b buff163) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	endpoint := "https://buff.163.com/api/market/goods/sell_order"
 	goodsId := strconv.Itoa(b.items[strings.ToLower(name)])
 	params := url.Values{
@@ -32,16 +31,16 @@ func (b buff163) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrRequestFailed
 	}
 
-	r, err := u.DoJSONRequest[Response](ctx, b.client, req, b.l)
+	r, err := m.DoJSONRequest[Response](ctx, b.client, req, b.l)
 	if err != nil {
 		b.l.Warn("Response error from buff163",
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrBadResponse
 	}
 
 	result, err := format(&r)
@@ -50,7 +49,7 @@ func (b buff163) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrFormatFailed
 	}
 
 	return result, nil
@@ -60,11 +59,11 @@ func (b buff163) URL(name string) string {
 	return "https://buff.163.com/goods/" + strconv.Itoa(b.items[strings.ToLower(name)])
 }
 
-func format(r *Response) ([]markets.Pair, error) {
+func format(r *Response) ([]m.Pair, error) {
 	countMap := make(map[float64]int, 1)
 
 	for _, i := range r.Data.Items {
-		if len(countMap) == markets.MaxOutputs {
+		if len(countMap) == m.MaxOutputs {
 			break
 		}
 
@@ -77,5 +76,5 @@ func format(r *Response) ([]markets.Pair, error) {
 		countMap[p]++
 	}
 
-	return u.PairsFromMap(countMap), nil
+	return m.PairsFromMap(countMap), nil
 }

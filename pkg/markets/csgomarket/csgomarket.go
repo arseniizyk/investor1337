@@ -2,20 +2,18 @@ package csgomarket
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
 // because csgo market returns int, not float64 so we need to divide it by 1000
 const priceDivider = 1000.0
 
-func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	endpoint := "https://market.csgo.com/api/v2/search-item-by-hash-name"
 	params := url.Values{
 		"key":       []string{cm.token},
@@ -30,21 +28,21 @@ func (cm csgoMarket) FindByHashName(ctx context.Context, name string) ([]markets
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrRequestFailed
 	}
 
-	r, err := u.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
+	r, err := m.DoJSONRequest[Response](ctx, cm.client, req, cm.l)
 	if err != nil {
 		cm.l.Warn("Response error from csgo market",
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrBadResponse
 	}
 
 	if !r.Success || len(r.Data) == 0 {
 		cm.l.Warn("Csgo market bad request", zap.String("name", name))
-		return nil, errors.New("bad request")
+		return nil, m.ErrNoOffers
 	}
 
 	return format(&r), nil
@@ -54,21 +52,21 @@ func (cm csgoMarket) URL(name string) string {
 	return "https://market.csgo.com/en/" + url.PathEscape(name)
 }
 
-func format(r *Response) []markets.Pair {
-	result := make([]markets.Pair, 0, markets.MaxOutputs)
+func format(r *Response) []m.Pair {
+	result := make([]m.Pair, 0, m.MaxOutputs)
 
 	for _, o := range r.Data {
-		if len(result) == markets.MaxOutputs {
+		if len(result) == m.MaxOutputs {
 			break
 		}
 		p := float64(o.Price) / priceDivider
-		result = append(result, markets.Pair{
+		result = append(result, m.Pair{
 			Price:    p,
 			Quantity: o.Count,
 		})
 	}
 
-	u.SortPairs(result)
+	m.SortPairs(result)
 
 	return result
 }

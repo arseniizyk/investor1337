@@ -2,14 +2,14 @@ package lisskins
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"unicode"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
@@ -37,15 +37,20 @@ func (ls lisskins) buildRequest(cursor, name string) (*http.Request, error) {
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, u.ErrRequest
+		return nil, m.ErrRequestFailed
 	}
 
 	return req, nil
 }
 
-func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
-	countMap, err := u.FetchWithCursor(ctx, ls.client, ls.l, name, "LIS-SKINS", maxPages, countInMap, ls.buildRequest)
+func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
+	countMap, err := m.FetchWithCursor(ctx, ls.client, ls.l, name, "LIS-SKINS", maxPages, countInMap, ls.buildRequest)
 	if err != nil {
+		if errors.Is(err, m.ErrEmptyResponse) {
+			ls.l.Warn("LIS-SKINS no offers", zap.String("name", name))
+			return nil, m.ErrNoOffers
+		}
+
 		ls.l.Warn("LIS-SKINS error in FetchWithCursor",
 			zap.String("name", name),
 			zap.Error(err),
@@ -53,7 +58,7 @@ func (ls lisskins) FindByHashName(ctx context.Context, name string) ([]markets.P
 		return nil, err
 	}
 
-	return u.PairsFromMap(countMap), nil
+	return m.PairsFromMap(countMap), nil
 }
 
 func (ls lisskins) URL(name string) string {
@@ -80,11 +85,11 @@ func (ls lisskins) URL(name string) string {
 	return "https://lis-skins.com/ru/market/csgo/" + formatted
 }
 
-func countInMap(m map[float64]int, r *Response) {
+func countInMap(countMap map[float64]int, r *Response) {
 	for _, o := range r.Data {
-		if len(m) == markets.MaxOutputs {
+		if len(countMap) == m.MaxOutputs {
 			break
 		}
-		m[o.Price]++
+		countMap[o.Price]++
 	}
 }

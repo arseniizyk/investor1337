@@ -2,12 +2,12 @@ package csfloat
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
@@ -37,7 +37,7 @@ func (c csfloat) buildRequest(cursor, name string) (*http.Request, error) {
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, u.ErrRequest
+		return nil, m.ErrRequestFailed
 	}
 
 	req.Header.Add("Cookie", c.cookie)
@@ -46,10 +46,15 @@ func (c csfloat) buildRequest(cursor, name string) (*http.Request, error) {
 	return req, nil
 }
 
-func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
-	countMap, err := u.FetchWithCursor(ctx, c.client, c.l, name, "CSFloat", maxPages, countInMap, c.buildRequest)
+func (c csfloat) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
+	countMap, err := m.FetchWithCursor(ctx, c.client, c.l, name, "CSFloat", maxPages, countInMap, c.buildRequest)
 
 	if err != nil {
+		if errors.Is(err, m.ErrEmptyResponse) {
+			c.l.Warn("CSFloat no offers", zap.String("name", name))
+			return nil, m.ErrNoOffers
+		}
+
 		c.l.Warn("CSFloat error in FetchWithCursor",
 			zap.String("name", name),
 			zap.Error(err),
@@ -57,20 +62,20 @@ func (c csfloat) FindByHashName(ctx context.Context, name string) ([]markets.Pai
 		return nil, err
 	}
 
-	return u.PairsFromMap(countMap), nil
+	return m.PairsFromMap(countMap), nil
 }
 
 func (c csfloat) URL(name string) string {
 	return "https://csfloat.com/search?market_hash_name=" + url.PathEscape(name)
 }
 
-func countInMap(m map[float64]int, r *Response) {
+func countInMap(countMap map[float64]int, r *Response) {
 	for _, seller := range r.Data {
-		if len(m) == markets.MaxOutputs {
+		if len(countMap) == m.MaxOutputs {
 			break
 		}
 
 		p := float64(seller.Price) / priceDivider
-		m[p]++
+		countMap[p]++
 	}
 }

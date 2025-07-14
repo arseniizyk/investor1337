@@ -8,12 +8,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
-func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	endpoint := "https://cs.money/2.0/market/sell-orders"
 	params := url.Values{
 		"limit":  []string{"60"},
@@ -33,17 +32,17 @@ func (csm csmoney) FindByHashName(ctx context.Context, name string) ([]markets.P
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrRequestFailed
 	}
 
-	r, err := u.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
+	r, err := m.DoJSONRequest[Response](ctx, csm.client, req, csm.l)
 
 	if err != nil {
 		csm.l.Warn("Response error from cs.money",
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrBadResponse
 	}
 
 	return format(&r), nil
@@ -75,15 +74,15 @@ func (csm csmoney) URL(name string) string {
 	// return "https://cs.money/ru/market/buy/" for simplicity, because the code above doesn't work for all items(like doppler knives)
 }
 
-func format(r *Response) []markets.Pair {
-	countMap := make(map[float64]int, markets.MaxOutputs)
+func format(r *Response) []m.Pair {
+	countMap := make(map[float64]int, m.MaxOutputs)
 
 	for _, item := range r.Items {
-		if len(countMap) == markets.MaxOutputs {
+		if len(countMap) == m.MaxOutputs {
 			break
 		}
 		countMap[item.Pricing.BasePrice]++
 	}
 
-	return u.PairsFromMap(countMap)
+	return m.PairsFromMap(countMap)
 }

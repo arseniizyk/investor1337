@@ -4,18 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/url"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
-var ErrNoOffers = errors.New("no offers")
-
-func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	payload := am.preparePayload(name)
 
 	b, err := json.Marshal(payload)
@@ -33,19 +29,19 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrRequestFailed
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
-	r, err := u.DoJSONRequest[Response](ctx, am.client, req, am.l)
+	r, err := m.DoJSONRequest[Response](ctx, am.client, req, am.l)
 	if err != nil {
 		am.l.Warn("Response error from aim.market",
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrBadResponse
 	}
 
 	result, err := format(&r)
@@ -53,7 +49,7 @@ func (am aimmarket) FindByHashName(ctx context.Context, name string) ([]markets.
 		am.l.Warn("no offers for aimmarket",
 			zap.String("name", name),
 		)
-		return nil, err
+		return nil, m.ErrNoOffers
 	}
 
 	return result, nil
@@ -63,14 +59,14 @@ func (am aimmarket) URL(name string) string {
 	return "https://aim.market/ru/buy/csgo/" + url.PathEscape(name)
 }
 
-func format(r *Response) ([]markets.Pair, error) {
+func format(r *Response) ([]m.Pair, error) {
 	res := r.Data.BotsInventoryCountAndMinPrice
 	if len(res) == 0 {
-		return nil, ErrNoOffers
+		return nil, m.ErrBadResponse
 	}
 
 	p := r.Data.BotsInventoryCountAndMinPrice[0].Price.SellPrice
 	count := r.Data.BotsInventoryCountAndMinPrice[0].Count
 
-	return u.SinglePair(p, count), nil
+	return m.SinglePair(p, count), nil
 }

@@ -9,12 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arseniizyk/investor1337/pkg/markets"
-	u "github.com/arseniizyk/investor1337/pkg/utils"
+	m "github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
 
-func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair, error) {
+func (s steam) FindByHashName(ctx context.Context, name string) ([]m.Pair, error) {
 	url := fmt.Sprintf("https://steamcommunity.com/market/itemordershistogram?norender=1&language=english&currency=1&item_nameid=%d", s.items[strings.ToLower(name)])
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -23,16 +22,16 @@ func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair,
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrRequestFailed
 	}
 
-	r, err := u.DoJSONRequest[Response](ctx, s.client, req, s.l)
+	r, err := m.DoJSONRequest[Response](ctx, s.client, req, s.l)
 	if err != nil {
 		s.l.Warn("Response error from steam",
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrBadResponse
 	}
 
 	results, err := format(&r)
@@ -41,7 +40,7 @@ func (s steam) FindByHashName(ctx context.Context, name string) ([]markets.Pair,
 			zap.String("name", name),
 			zap.Error(err),
 		)
-		return nil, err
+		return nil, m.ErrFormatFailed
 	}
 
 	return results, nil
@@ -51,12 +50,12 @@ func (s steam) URL(name string) string {
 	return "https://steamcommunity.com/market/listings/730/" + url.PathEscape(name)
 }
 
-func format(r *Response) ([]markets.Pair, error) {
-	results := make([]markets.Pair, 0, markets.MaxOutputs)
+func format(r *Response) ([]m.Pair, error) {
+	results := make([]m.Pair, 0, m.MaxOutputs)
 	re := regexp.MustCompile(`\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+|\d+`)
 
 	for i, orders := range r.SellOrderTable {
-		if i == markets.MaxOutputs {
+		if i == m.MaxOutputs {
 			break
 		}
 
@@ -72,13 +71,13 @@ func format(r *Response) ([]markets.Pair, error) {
 			return nil, err
 		}
 
-		results = append(results, markets.Pair{
+		results = append(results, m.Pair{
 			Price:    price,
 			Quantity: quantity,
 		})
 	}
 
-	u.SortPairs(results)
+	m.SortPairs(results)
 
 	return results, nil
 }
