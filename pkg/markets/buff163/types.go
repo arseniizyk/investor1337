@@ -1,14 +1,17 @@
 package buff163
 
 import (
+	"embed"
 	"encoding/json"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
+
+//go:embed buff163ids.json
+var buff163ids embed.FS
 
 type buff163 struct {
 	client *http.Client
@@ -39,7 +42,7 @@ func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 }
 
 func (buff *buff163) loadItems() error {
-	b, err := os.ReadFile("../buff163ids.json")
+	b, err := buff163ids.ReadFile("buff163ids.json")
 	if err != nil {
 		buff.l.Error("Cant load buff163 ids from json", zap.Error(err))
 		return err

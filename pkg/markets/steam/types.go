@@ -1,14 +1,17 @@
 package steam
 
 import (
+	"embed"
 	"encoding/json"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
+
+//go:embed cs2ids.json
+var cs2ids embed.FS
 
 type steam struct {
 	client *http.Client
@@ -39,7 +42,7 @@ func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 }
 
 func (s *steam) loadItems() error {
-	b, err := os.ReadFile("../cs2ids.json")
+	b, err := cs2ids.ReadFile("cs2ids.json")
 	if err != nil {
 		s.l.Error("Cant load cs2 ids from json", zap.Error(err))
 		return err

@@ -1,0 +1,8 @@
+services:
+    investor-bot:
+        image: 'investor-bot'
+        container_name: 'investor-bot'
+        build: ./
+        env_file: .env
+        environment:
+            - IS_DOCKER=true

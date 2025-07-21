@@ -1,12 +1,15 @@
 package aimmarket
 
 import (
+	"embed"
 	"net/http"
-	"os"
 
 	"github.com/arseniizyk/investor1337/pkg/markets"
 	"go.uber.org/zap"
 )
+
+//go:embed query.graphql
+var graphqlQuery embed.FS
 
 type aimmarket struct {
 	client *http.Client
@@ -43,12 +46,12 @@ func New(c *http.Client, l *zap.Logger) (markets.Market, error) {
 }
 
 func (am *aimmarket) loadGraphQlQuery() error {
-	query, err := os.ReadFile("../pkg/markets/aimmarket/query.graphql")
+	data, err := graphqlQuery.ReadFile("query.graphql")
 	if err != nil {
 		am.l.Error("Cant load GraphQL query file", zap.Error(err))
 		return err
 	}
 
-	am.query = query
+	am.query = data
 	return nil
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -45,8 +46,10 @@ func New() (Config, error) {
 }
 
 func loadConfig() (*envConfig, error) {
-	if err := godotenv.Load("../.env"); err != nil {
-		return nil, fmt.Errorf("cant load .env: %w", err)
+	if os.Getenv("IS_DOCKER") == "" {
+		if err := godotenv.Load("../.env"); err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	return &envConfig{
