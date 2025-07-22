@@ -9,38 +9,26 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (t tbot) Run() error {
-	pref := tele.Settings{
-		Token:  t.token,
-		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
-	}
+func (b *Bot) Run() error {
+	b.l.Info("Bot running", zap.String("username", b.bot.Me.Username))
 
-	b, err := tele.NewBot(pref)
-	if err != nil {
-		t.l.Error("Error while running tbot", zap.Error(err))
-		return err
-	}
-
-	t.l.Info("Bot running", zap.String("username", b.Me.Username))
-
-	b.Handle("/start", func(c tele.Context) error {
+	b.bot.Handle("/start", func(c tele.Context) error {
 		return c.Send("Type skin name (e.g Fracture Case)")
 	})
+	b.bot.Handle(tele.OnText, b.findByName)
 
-	b.Handle(tele.OnText, t.findByName)
-
-	b.Start()
+	b.bot.Start()
 
 	return nil
 }
 
-func (t tbot) findByName(c tele.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+func (b *Bot) findByName(c tele.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	start := time.Now()
-	defer u.RecordLatency(t.l, "findByName time to answer", start)
-	responses := t.a.SearchAll(ctx, c.Text())
+	defer u.RecordLatency(b.l, "findByName time to answer", start)
+	responses := b.a.SearchAll(ctx, c.Text())
 
 	msg := format(responses)
 	return c.Send(msg, tele.ModeMarkdown, tele.NoPreview)

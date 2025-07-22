@@ -18,21 +18,20 @@ import (
 	"go.uber.org/zap"
 )
 
-type App interface {
-	Run() error
-}
-
-type app struct {
+type App struct {
 	c config.Config
 	l *zap.Logger
 	a *aggregator.Aggregator
 }
 
-func (a app) Run() error {
-	tbot := bot.New(a.c.TelegramToken(), a.l, a.a)
+func (a *App) Run() error {
+	tbot, err := bot.New(a.c.TelegramToken(), a.l, a.a)
+	if err != nil {
+		return err
+	}
 
 	if err := tbot.Run(); err != nil {
-		a.l.Error("Error while runnig tbot", zap.Error(err))
+		a.l.Error("Error while running tbot", zap.Error(err))
 		return err
 	}
 
@@ -74,7 +73,7 @@ func New(cfg config.Config, l *zap.Logger) App {
 
 	agg := aggregator.New(markets, l)
 
-	return app{
+	return App{
 		c: cfg,
 		l: l,
 		a: agg,

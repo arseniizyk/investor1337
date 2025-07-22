@@ -11,15 +11,15 @@ import (
 	"go.uber.org/zap"
 )
 
+type Aggregator struct {
+	markets map[string]markets.Market
+	l       *zap.Logger
+}
+
 type MarketInfo struct {
 	Market string
 	Orders []markets.Pair
 	URL    string
-}
-
-type Aggregator struct {
-	markets map[string]markets.Market
-	l       *zap.Logger
 }
 
 func New(markets map[string]markets.Market, l *zap.Logger) *Aggregator {
