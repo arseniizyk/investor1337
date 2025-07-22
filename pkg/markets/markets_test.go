@@ -12,20 +12,6 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-type mockPaginatedResponse struct {
-	Items  []int
-	Next   string
-	Called int
-}
-
-func (m *mockPaginatedResponse) LenData() int {
-	return len(m.Items)
-}
-
-func (m *mockPaginatedResponse) Cursor() string {
-	return m.Next
-}
-
 type mockResponse struct {
 	Data string `json:"data"`
 }
