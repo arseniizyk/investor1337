@@ -5,12 +5,11 @@ import (
 
 	"github.com/arseniizyk/investor1337/internal/aggregator"
 	"go.uber.org/zap"
-	"gopkg.in/telebot.v4"
 	tele "gopkg.in/telebot.v4"
 )
 
 type Bot struct {
-	bot *telebot.Bot
+	bot *tele.Bot
 	l   *zap.Logger
 	a   *aggregator.Aggregator
 }
